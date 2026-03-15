@@ -180,9 +180,14 @@ export default function OutlinePage() {
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
             rows={3}
+            maxLength={500}
             placeholder="e.g. Skip entrepreneurship today, she's tired. More focus on reading."
             className="w-full rounded-xl border border-[#e8e4e0] px-4 py-3 text-sm text-[#2d2d2d] placeholder:text-[#b0aba6] focus:outline-none focus:ring-2 focus:ring-[#5b8f8a] resize-none"
           />
+          {/* Character counter — shows when approaching limit */}
+          {feedback.length > 400 && (
+            <p className="text-xs text-[#8a8580] text-right mt-1">{feedback.length}/500</p>
+          )}
         </div>
 
         {/* Error */}

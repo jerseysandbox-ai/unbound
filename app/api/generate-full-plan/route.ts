@@ -9,10 +9,19 @@
  */
 
 import { NextResponse } from "next/server";
+import Stripe from "stripe";
 import { kv } from "@vercel/kv";
 import { generateFullPlan } from "@/lib/agents";
 import type { GeneratedOutline } from "@/lib/agents";
 import type { ChildProfile } from "@/app/profile/page";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2026-02-25.clover",
+});
+
+// Max characters allowed in parent feedback before truncation — prevents
+// prompt injection and runaway token costs
+const MAX_FEEDBACK_CHARS = 500;
 
 // 5-minute timeout — full pipeline with 7 parallel specialists + Architect
 export const maxDuration = 300;
@@ -30,15 +39,34 @@ interface StoredOutline {
 }
 
 export async function POST(request: Request) {
+  // Parse body up front so we can reference paymentIntentId in error handler
+  let paymentIntentId: string | undefined;
+  let feedback: string | undefined;
+
   try {
     const body = await request.json();
-    const { paymentIntentId, feedback } = body as {
-      paymentIntentId: string;
-      feedback?: string;
-    };
+    paymentIntentId = body.paymentIntentId;
+    // Truncate feedback to prevent prompt injection and token blowout
+    feedback = body.feedback
+      ? String(body.feedback).slice(0, MAX_FEEDBACK_CHARS)
+      : undefined;
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
 
+  try {
     if (!paymentIntentId) {
       return NextResponse.json({ error: "Missing paymentIntentId" }, { status: 400 });
+    }
+
+    // ── Re-verify payment with Stripe before running expensive pipeline ──────
+    // Critical: prevents free plan generation by anyone who has a paymentIntentId
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    if (paymentIntent.status !== "succeeded") {
+      return NextResponse.json(
+        { error: "Payment has not been completed" },
+        { status: 402 }
+      );
     }
 
     // ── Retrieve stored outline ──────────────────────────────────────────────
@@ -107,18 +135,17 @@ export async function POST(request: Request) {
   } catch (err: unknown) {
     console.error("[generate-full-plan] Error:", err);
 
-    // Update status to error so polling page can surface it
-    try {
-      const body = await new Response(request.body).json().catch(() => ({}));
-      const piId = (body as { paymentIntentId?: string }).paymentIntentId;
-      if (piId) {
+    // Update status to error so the polling page can surface it to the user.
+    // paymentIntentId is already parsed from the body above — no re-read needed.
+    if (paymentIntentId) {
+      try {
         await kv.set(
-          `status:${piId}`,
+          `status:${paymentIntentId}`,
           { phase: "error", progress: 0, message: "Something went wrong. Please contact support." },
           { ex: KV_TTL }
         );
-      }
-    } catch { /* best-effort status update */ }
+      } catch { /* best-effort — don't mask the original error */ }
+    }
 
     return NextResponse.json(
       { error: "Plan generation failed. Please contact support." },
