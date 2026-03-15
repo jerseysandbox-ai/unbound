@@ -53,6 +53,8 @@ export default function ProfilePage() {
     focusToday: "",
   });
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [consentError, setConsentError] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -67,6 +69,12 @@ export default function ProfilePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setConsentError(false);
+
+    if (!consentChecked) {
+      setConsentError(true);
+      return;
+    }
 
     if (!turnstileToken) {
       setError("Please complete the security check below.");
@@ -243,6 +251,38 @@ export default function ProfilePage() {
               onVerify={(token) => setTurnstileToken(token)}
               onError={() => setTurnstileToken(null)}
             />
+          </div>
+
+          {/* Consent checkbox */}
+          <div>
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={consentChecked}
+                onChange={(e) => {
+                  setConsentChecked(e.target.checked);
+                  if (e.target.checked) setConsentError(false);
+                }}
+                className="mt-0.5 h-4 w-4 rounded border-[#e0dbd5] accent-[#5b8f8a] cursor-pointer"
+              />
+              <span className="text-sm text-[#2d2d2d]">
+                I agree to the{" "}
+                <a
+                  href="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#5b8f8a] underline hover:text-[#3d6e69]"
+                >
+                  Privacy Policy
+                </a>{" "}
+                and consent to my child&apos;s information being processed to generate a lesson plan.
+              </span>
+            </label>
+            {consentError && (
+              <p className="text-red-600 text-sm bg-red-50 rounded-lg px-4 py-2 mt-2">
+                You must agree to the Privacy Policy to continue.
+              </p>
+            )}
           </div>
 
           {/* Error */}
