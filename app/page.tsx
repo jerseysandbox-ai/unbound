@@ -116,7 +116,11 @@ export default function HomePage() {
       </section>
 
       <footer className="text-center text-xs text-[#8a8580] pb-8">
-        © {new Date().getFullYear()} Unbound. Made with love for every kind of learner.
+        © {new Date().getFullYear()} Unbound. Made with love for every kind of learner.{" "}
+        ·{" "}
+        <Link href="/privacy" className="hover:underline">
+          Privacy Policy
+        </Link>
       </footer>
     </main>
   );
