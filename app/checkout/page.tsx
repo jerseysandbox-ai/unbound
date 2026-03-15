@@ -149,10 +149,12 @@ function CheckoutForm({ paymentIntentId }: { paymentIntentId: string }) {
       // Navigate to the plan
       router.push(`/plan/${paymentIntentId}`);
     } catch (err: unknown) {
+      // Payment succeeded but generation failed — show recovery message with
+      // paymentIntentId so support can manually assist or retry
       setError(
-        err instanceof Error
-          ? err.message
-          : "Plan generation failed. Please contact support."
+        `Your payment was successful but we hit an error generating your plan. ` +
+        `Please email support@unboundlearn.co with reference ID: ${paymentIntentId} ` +
+        `and we'll get your plan to you right away.`
       );
       setProcessing(false);
     }

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { GeneratedPlan } from "@/lib/agents";
 
 export default function PlanPage() {
@@ -69,8 +71,6 @@ export default function PlanPage() {
     day: "numeric",
   });
 
-  const planLines = plan.plan.split("\n");
-
   return (
     <>
       {/* Print styles — hide UI chrome when printing */}
@@ -104,8 +104,10 @@ export default function PlanPage() {
 
         {/* Plan content */}
         <div className="max-w-3xl mx-auto px-4 py-8">
-          <article className="bg-white rounded-2xl shadow-sm border border-[#e8e4e0] p-6 sm:p-8">
-            <PlanContent lines={planLines} />
+          <article className="bg-white rounded-2xl shadow-sm border border-[#e8e4e0] p-6 sm:p-8 prose prose-stone max-w-none prose-headings:text-[#2d2d2d] prose-h2:text-[#5b8f8a]">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {plan.plan}
+            </ReactMarkdown>
           </article>
 
           {/* Agent credits */}
@@ -151,56 +153,4 @@ export default function PlanPage() {
   );
 }
 
-/**
- * Render markdown-ish plan text as styled React elements.
- * Handles # ## ### headings, --- dividers, bullet points, and paragraphs.
- */
-function PlanContent({ lines }: { lines: string[] }) {
-  return (
-    <div className="space-y-1">
-      {lines.map((line, i) => {
-        const trimmed = line.trim();
 
-        if (trimmed.startsWith("# ")) {
-          return (
-            <h1 key={i} className="text-2xl font-bold text-[#2d2d2d] mt-6 mb-2">
-              {trimmed.slice(2)}
-            </h1>
-          );
-        }
-        if (trimmed.startsWith("## ")) {
-          return (
-            <h2 key={i} className="text-xl font-bold text-[#5b8f8a] mt-6 mb-2">
-              {trimmed.slice(3)}
-            </h2>
-          );
-        }
-        if (trimmed.startsWith("### ")) {
-          return (
-            <h3 key={i} className="text-base font-bold text-[#2d2d2d] mt-4 mb-1">
-              {trimmed.slice(4)}
-            </h3>
-          );
-        }
-        if (trimmed === "---") {
-          return <hr key={i} className="border-[#e8e4e0] my-4" />;
-        }
-        if (trimmed === "") {
-          return <div key={i} className="h-2" />;
-        }
-        if (trimmed.startsWith("- ") || trimmed.startsWith("• ")) {
-          return (
-            <p key={i} className="text-[#2d2d2d] leading-relaxed text-sm sm:text-base pl-4">
-              {trimmed}
-            </p>
-          );
-        }
-        return (
-          <p key={i} className="text-[#2d2d2d] leading-relaxed text-sm sm:text-base">
-            {trimmed}
-          </p>
-        );
-      })}
-    </div>
-  );
-}

@@ -9,6 +9,9 @@
 
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+
+// Extend Vercel function timeout to 5 minutes — multi-agent pipeline takes 50–75s
+export const maxDuration = 300;
 import { kv } from "@vercel/kv";
 import { generatePlan } from "@/lib/agents";
 import type { ChildProfile } from "@/app/profile/page";
@@ -56,7 +59,16 @@ export async function POST(request: Request) {
     const generatedPlan = await generatePlan(profile);
 
     // ── Store in KV with 24h TTL ────────────────────────────────────────────
-    await kv.set(`plan:${paymentIntentId}`, generatedPlan, {
+    // Only store plan content + child's first name for display — never store
+    // diagnosis, challenges, or other sensitive profile fields in KV
+    const safeStoredPlan = {
+      plan: generatedPlan.plan,
+      childBrief: generatedPlan.childBrief,
+      agentOutputs: generatedPlan.agentOutputs,
+      generatedAt: generatedPlan.generatedAt,
+      profile: { childName: generatedPlan.profile.childName }, // first name only
+    };
+    await kv.set(`plan:${paymentIntentId}`, safeStoredPlan, {
       ex: KV_TTL_SECONDS,
     });
 
