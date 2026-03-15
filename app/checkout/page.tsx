@@ -126,7 +126,9 @@ function CheckoutForm({ paymentIntentId }: { paymentIntentId: string }) {
     }
 
     try {
-      const res = await fetch("/api/generate-plan", {
+      // Phase 1: Generate outline (Sage + Planner only — fast ~15s)
+      // Full plan generation happens after parent reviews the outline
+      const res = await fetch("/api/generate-outline", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -137,7 +139,7 @@ function CheckoutForm({ paymentIntentId }: { paymentIntentId: string }) {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Plan generation failed");
+        throw new Error(data.error || "Outline generation failed");
       }
 
       // Clean up session data
@@ -146,11 +148,10 @@ function CheckoutForm({ paymentIntentId }: { paymentIntentId: string }) {
       sessionStorage.removeItem("unbound_pi_id");
       sessionStorage.removeItem("unbound_turnstile");
 
-      // Navigate to the plan
-      router.push(`/plan/${paymentIntentId}`);
+      // Navigate to outline waiting page (phase=outline)
+      router.push(`/generating/${paymentIntentId}?phase=outline`);
     } catch (err: unknown) {
-      // Payment succeeded but generation failed — show recovery message with
-      // paymentIntentId so support can manually assist or retry
+      // Payment succeeded but outline generation failed — show recovery message
       setError(
         `Your payment was successful but we hit an error generating your plan. ` +
         `Please email support@unboundlearn.co with reference ID: ${paymentIntentId} ` +
@@ -183,7 +184,7 @@ function CheckoutForm({ paymentIntentId }: { paymentIntentId: string }) {
         disabled={!stripe || processing}
         className="w-full bg-[#5b8f8a] hover:bg-[#3d6e69] disabled:opacity-60 text-white font-semibold text-lg py-4 rounded-xl transition-colors"
       >
-        {processing ? "Generating your plan…" : "Pay $9 & Get My Plan"}
+        {processing ? "Processing…" : "Pay $9 & Get My Plan"}
       </button>
 
       <p className="text-center text-xs text-[#8a8580]">
