@@ -59,36 +59,40 @@ function formatProfile(profile: ChildProfile): string {
     "halfday": "Half day (3–4 hours)",
   };
 
+  const gradeLabels: Record<string, string> = {
+    K: "Kindergarten", "1": "1st grade", "2": "2nd grade", "3": "3rd grade",
+    "4": "4th grade", "5": "5th grade", "6": "6th grade", "7": "7th grade",
+    "8": "8th grade", "9": "9th grade", "10": "10th grade", "11": "11th grade",
+    "12": "12th grade", mixed: "Mixed / no fixed grade level",
+  };
+
   return `
-Child Name: ${profile.childName}
-Age: ${profile.age}
-Diagnosis / Neurodivergent Profile: ${profile.diagnosis}
+Nickname: ${profile.childName}
+Grade Level: ${gradeLabels[profile.gradeLevel] || profile.gradeLevel}
 Top Interests: ${profile.interests}
-Academic Level: ${profile.academicLevel}
-Biggest Learning Challenges: ${profile.learningChallenges}
+What They Find Tough: ${profile.learningChallenges}
 Session Length Today: ${sessionLabels[profile.sessionLength] || profile.sessionLength}
-Parent's Focus Today: ${profile.focusToday}
+Parent's Priority Today: ${profile.focusToday}
 `.trim();
 }
 
 // ─── Round 1: Sage ───────────────────────────────────────────────────────────
 
 async function runSage(profile: ChildProfile): Promise<string> {
-  const system = `You are 🧠 Sage — a compassionate specialist in neurodivergent learning, PANS/PANDAS, ADHD, autism, anxiety, and twice-exceptional children.
+  const system = `You are 🧠 Sage — a warm, experienced learning specialist who understands how different kids tick.
 
-Your role is to read a child's profile and produce a "Child Brief" — a concise set of considerations that all subject-area teachers should know before planning activities.
+Your role is to read a child's profile and produce a "Learner Brief" — a concise set of practical considerations that subject-area teachers should know before planning activities for this child.
 
-The Child Brief should cover:
-1. Key sensitivities and triggers to avoid
-2. Engagement strategies proven to work for this profile
-3. Pacing recommendations (work chunks, break frequency, transition tips)
-4. Motivational hooks based on their interests
-5. Any specific accommodations to keep in mind
-6. A warm 1-sentence framing of this child's strengths
+The Learner Brief should cover:
+1. How to hook this child's engagement based on their interests
+2. How to work with (not against) their learning challenges — practical strategies
+3. Pacing recommendations (work chunks, break suggestions, transition tips)
+4. The right tone and energy for today given the parent's priority
+5. A warm 1-sentence framing of this child's strengths to keep front of mind
 
-Be specific, practical, and warm. This brief will guide 7 subject specialists. Keep it under 400 words.`;
+Be specific, practical, and warm. Avoid clinical or diagnostic language. This brief will guide 7 subject specialists. Keep it under 400 words.`;
 
-  const userMessage = `Please create a Child Brief for the following child:\n\n${formatProfile(profile)}`;
+  const userMessage = `Please create a Learner Brief for the following child:\n\n${formatProfile(profile)}`;
 
   return await callClaude(system, userMessage);
 }
@@ -107,7 +111,7 @@ const SPECIALISTS: SpecialistConfig[] = [
     emoji: "📐",
     name: "Euler",
     subject: "Math",
-    systemPrompt: `You are 📐 Euler — a patient, creative math educator who specializes in making math feel like play for neurodivergent kids.
+    systemPrompt: `You are 📐 Euler — a patient, creative math educator who specializes in making math feel like play.
 
 Design ONE engaging math activity or mini-lesson for today. Use the child's interests as a hook wherever possible. Be concrete: include the concept, materials needed (if any), how to present it, and one extension if they want more.
 
@@ -117,7 +121,7 @@ Keep it warm, encouraging, and realistic for the session length. Format your out
     emoji: "📖",
     name: "Darwin",
     subject: "Science",
-    systemPrompt: `You are 📖 Darwin — a curious science educator who makes the natural and physical world irresistible to neurodivergent learners.
+    systemPrompt: `You are 📖 Darwin — a curious science educator who makes the natural and physical world irresistible to every kind of learner.
 
 Design ONE science activity or exploration for today. Tie it to the child's interests if possible. Include: the concept/phenomenon to explore, a hands-on element (or thought experiment if no materials), discussion questions, and a wonder hook at the end.
 
@@ -127,7 +131,7 @@ Keep it engaging and concrete. Format clearly with a title.`,
     emoji: "✍️",
     name: "Paige",
     subject: "Language Arts",
-    systemPrompt: `You are ✍️ Paige — a warm literacy specialist who helps neurodivergent kids find their voice through reading, writing, and storytelling.
+    systemPrompt: `You are ✍️ Paige — a warm literacy specialist who helps kids find their voice through reading, writing, and storytelling.
 
 Design ONE language arts activity for today — could be reading, writing, storytelling, or oral language. Use the child's interests as a hook. Include: the activity description, how to scaffold it for their challenges, and one optional extension.
 
@@ -147,7 +151,7 @@ Format clearly with a title.`,
     emoji: "❤️",
     name: "Grounded",
     subject: "SEL & Executive Functioning",
-    systemPrompt: `You are ❤️ Grounded — a compassionate SEL and executive functioning coach who helps neurodivergent kids build emotional regulation, self-awareness, and life skills.
+    systemPrompt: `You are ❤️ Grounded — a compassionate SEL and life skills coach who helps kids build emotional regulation, self-awareness, and independence.
 
 Design ONE SEL or executive functioning activity for today. It could be a regulation check-in, a coping skill practice, an organization/planning exercise, or a self-reflection activity.
 
@@ -159,7 +163,7 @@ Format clearly with a title.`,
     emoji: "🎨",
     name: "Studio",
     subject: "Arts & Creative Expression",
-    systemPrompt: `You are 🎨 Studio — a creative arts educator who believes every neurodivergent kid has an artist inside them.
+    systemPrompt: `You are 🎨 Studio — a creative arts educator who believes every kid has an artist inside them.
 
 Design ONE creative arts activity for today. Could be visual art, music, drama, creative writing, or maker/craft. Connect to the child's interests wherever possible.
 
@@ -186,7 +190,7 @@ async function runSpecialist(
   profile: ChildProfile,
   childBrief: string
 ): Promise<AgentOutput> {
-  const userMessage = `CHILD PROFILE:\n${formatProfile(profile)}\n\nSAGE'S CHILD BRIEF:\n${childBrief}\n\nPlease design your ${specialist.subject} activity for today.`;
+  const userMessage = `LEARNER PROFILE:\n${formatProfile(profile)}\n\nSAGE'S LEARNER BRIEF:\n${childBrief}\n\nPlease design your ${specialist.subject} activity for today.`;
 
   try {
     const content = await callClaude(specialist.systemPrompt, userMessage);
@@ -214,7 +218,7 @@ async function runArchitect(
   childBrief: string,
   agentOutputs: AgentOutput[]
 ): Promise<string> {
-  const system = `You are 📋 Architect — the master planner for Unbound, a homeschool curriculum tool for neurodivergent kids.
+  const system = `You are 📋 Architect — the master planner for Unbound, a personalized homeschool curriculum tool.
 
 Your job is to take the child's profile, Sage's Child Brief, and all subject specialist activities, and weave them into ONE beautifully formatted, cohesive daily lesson plan.
 
@@ -261,7 +265,7 @@ Rules:
     .map((o) => o.subject)
     .join(", ");
 
-  const userMessage = `CHILD PROFILE:\n${formatProfile(profile)}\n\nSAGE'S CHILD BRIEF:\n${childBrief}\n\nSUBJECT SPECIALIST ACTIVITIES:\n\n${subjectOutputs}${failedAgents ? `\n\nNote: The following subjects encountered errors and should be omitted: ${failedAgents}` : ""}\n\nPlease assemble the final daily plan.`;
+  const userMessage = `LEARNER PROFILE:\n${formatProfile(profile)}\n\nSAGE'S LEARNER BRIEF:\n${childBrief}\n\nSUBJECT SPECIALIST ACTIVITIES:\n\n${subjectOutputs}${failedAgents ? `\n\nNote: The following subjects encountered errors and should be omitted: ${failedAgents}` : ""}\n\nPlease assemble the final daily plan.`;
 
   return await callClaude(system, userMessage);
 }

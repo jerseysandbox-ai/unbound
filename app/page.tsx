@@ -13,16 +13,16 @@ export default function HomePage() {
       {/* Hero */}
       <section className="max-w-2xl mx-auto px-6 pt-16 pb-12 text-center">
         <div className="inline-block bg-[#e8f4f3] text-[#3d6e69] text-sm font-medium px-3 py-1 rounded-full mb-6">
-          Built for neurodivergent learners
+          Personalized homeschool plans, instantly
         </div>
         <h1 className="text-4xl sm:text-5xl font-bold text-[#2d2d2d] leading-tight mb-6">
           A lesson plan made{" "}
           <span className="text-[#5b8f8a]">just for your child.</span>
         </h1>
         <p className="text-lg text-[#8a8580] mb-10 leading-relaxed">
-          Fill in a quick profile. Pay once. Get a full personalized daily plan
-          crafted by a team of AI specialists — designed around how{" "}
-          <em>your</em> kid learns best.
+          Tell us about your learner. Pay once. Get a full personalized daily
+          plan crafted by a team of AI specialists — built around their
+          interests, their pace, and your goals for today.
         </p>
         <Link
           href="/profile"
@@ -44,13 +44,13 @@ export default function HomePage() {
           {[
             {
               step: "1",
-              title: "Tell us about your child",
-              desc: "Share their age, interests, challenges, and what you want to focus on today.",
+              title: "Tell us about your learner",
+              desc: "Share their grade level, interests, what they find tough, and what you want to focus on today.",
             },
             {
               step: "2",
               title: "Our AI team gets to work",
-              desc: "9 specialized AI agents collaborate — a neurodivergent specialist, subject experts, and a master planner.",
+              desc: "9 specialized AI agents collaborate — a learning specialist, subject experts, and a master planner who weaves it all together.",
             },
             {
               step: "3",
@@ -81,10 +81,10 @@ export default function HomePage() {
               { icon: "📖", label: "Science" },
               { icon: "✍️", label: "Language Arts" },
               { icon: "🌍", label: "Social Studies" },
-              { icon: "❤️", label: "SEL + Executive Function" },
+              { icon: "❤️", label: "SEL + Life Skills" },
               { icon: "🎨", label: "Arts & Creative Expression" },
               { icon: "💡", label: "Entrepreneurship" },
-              { icon: "🧠", label: "Neurodivergent-aware pacing" },
+              { icon: "🧠", label: "Pacing built around your child" },
             ].map(({ icon, label }) => (
               <div
                 key={label}
@@ -116,7 +116,7 @@ export default function HomePage() {
       </section>
 
       <footer className="text-center text-xs text-[#8a8580] pb-8">
-        © {new Date().getFullYear()} Unbound. Made with love for every kind of mind.
+        © {new Date().getFullYear()} Unbound. Made with love for every kind of learner.
       </footer>
     </main>
   );

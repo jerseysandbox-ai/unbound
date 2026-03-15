@@ -10,11 +10,9 @@ const TurnstileWidget = dynamic(() => import("@/components/TurnstileWidget"), {
 });
 
 export interface ChildProfile {
-  childName: string;
-  age: string;
-  diagnosis: string;
+  childName: string;       // nickname — not necessarily legal name
+  gradeLevel: string;      // grade level instead of age
   interests: string;
-  academicLevel: string;
   learningChallenges: string;
   sessionLength: string;
   focusToday: string;
@@ -27,14 +25,29 @@ const SESSION_OPTIONS = [
   { value: "halfday", label: "Half day (3–4 hours)" },
 ];
 
+const GRADE_OPTIONS = [
+  { value: "K", label: "Kindergarten" },
+  { value: "1", label: "1st grade" },
+  { value: "2", label: "2nd grade" },
+  { value: "3", label: "3rd grade" },
+  { value: "4", label: "4th grade" },
+  { value: "5", label: "5th grade" },
+  { value: "6", label: "6th grade" },
+  { value: "7", label: "7th grade" },
+  { value: "8", label: "8th grade" },
+  { value: "9", label: "9th grade" },
+  { value: "10", label: "10th grade" },
+  { value: "11", label: "11th grade" },
+  { value: "12", label: "12th grade" },
+  { value: "mixed", label: "Mixed / we don't use grade levels" },
+];
+
 export default function ProfilePage() {
   const router = useRouter();
   const [form, setForm] = useState<ChildProfile>({
     childName: "",
-    age: "",
-    diagnosis: "",
+    gradeLevel: "4",
     interests: "",
-    academicLevel: "",
     learningChallenges: "",
     sessionLength: "1hour",
     focusToday: "",
@@ -63,10 +76,8 @@ export default function ProfilePage() {
     // Validate required fields
     const required: (keyof ChildProfile)[] = [
       "childName",
-      "age",
-      "diagnosis",
+      "gradeLevel",
       "interests",
-      "academicLevel",
       "learningChallenges",
       "focusToday",
     ];
@@ -80,12 +91,11 @@ export default function ProfilePage() {
     setSubmitting(true);
 
     try {
-      // Store profile in sessionStorage and move to checkout
-      // (profile will be sent server-side only after payment succeeds)
+      // Store profile in sessionStorage — sent server-side only after payment succeeds
       sessionStorage.setItem("unbound_profile", JSON.stringify(form));
       sessionStorage.setItem("unbound_turnstile", turnstileToken);
 
-      // Create Stripe PaymentIntent server-side before redirecting
+      // Create Stripe PaymentIntent server-side before redirecting to checkout
       const res = await fetch("/api/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -120,11 +130,10 @@ export default function ProfilePage() {
             Unbound
           </a>
           <h1 className="text-3xl font-bold text-[#2d2d2d] mt-4 mb-2">
-            Tell us about your child
+            Tell us about your learner
           </h1>
           <p className="text-[#8a8580]">
-            The more detail you share, the better the plan. Takes about 3
-            minutes.
+            The more detail you share, the better the plan. Takes about 3 minutes.
           </p>
         </div>
 
@@ -132,89 +141,71 @@ export default function ProfilePage() {
           onSubmit={handleSubmit}
           className="bg-white rounded-2xl shadow-sm border border-[#e8e4e0] p-6 space-y-5"
         >
-          {/* Child's name */}
-          <Field label="Child's first name" required>
+          {/* Nickname */}
+          <Field
+            label="What do you call them at home?"
+            hint="A nickname is fine — whatever feels natural"
+            required
+          >
             <input
               name="childName"
               value={form.childName}
               onChange={handleChange}
-              placeholder="e.g. Maya"
+              placeholder="e.g. Bug, Maya, Theo"
               className={inputClass}
             />
           </Field>
 
-          {/* Age */}
-          <Field label="Age" required>
-            <input
-              name="age"
-              value={form.age}
+          {/* Grade level */}
+          <Field label="Target grade level" required>
+            <select
+              name="gradeLevel"
+              value={form.gradeLevel}
               onChange={handleChange}
-              placeholder="e.g. 9"
               className={inputClass}
-            />
-          </Field>
-
-          {/* Diagnosis */}
-          <Field
-            label="Diagnosis / neurodivergent profile"
-            hint="Free text — be as specific or general as you like"
-            required
-          >
-            <textarea
-              name="diagnosis"
-              value={form.diagnosis}
-              onChange={handleChange}
-              placeholder='e.g. "ADHD and anxiety", "PANS/PANDAS", "autism level 1 with PDA profile"'
-              rows={3}
-              className={textareaClass}
-            />
+            >
+              {GRADE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </Field>
 
           {/* Interests */}
           <Field
-            label="Top 3 interests / what excites them"
-            hint="This is how we hook them in"
+            label="What are their top interests?"
+            hint="This is how we hook them in — the more specific, the better"
             required
           >
             <textarea
               name="interests"
               value={form.interests}
               onChange={handleChange}
-              placeholder="e.g. Minecraft, dinosaurs, drawing anime characters"
+              placeholder="e.g. Minecraft, dinosaurs, drawing anime characters, building things"
               rows={2}
               className={textareaClass}
             />
           </Field>
 
-          {/* Academic level */}
+          {/* Learning challenges */}
           <Field
-            label="Current academic level"
-            hint="Grade equivalent or describe in your own words"
+            label="What do they find tough?"
+            hint="Every kid has something — this helps us plan around it"
             required
           >
-            <input
-              name="academicLevel"
-              value={form.academicLevel}
-              onChange={handleChange}
-              placeholder='e.g. "3rd grade math, 5th grade reading" or "behind in writing, ahead in science"'
-              className={inputClass}
-            />
-          </Field>
-
-          {/* Learning challenges */}
-          <Field label="Biggest learning challenges" required>
             <textarea
               name="learningChallenges"
               value={form.learningChallenges}
               onChange={handleChange}
-              placeholder="e.g. Struggles to start tasks, shuts down when frustrated, needs frequent breaks"
+              placeholder="e.g. Struggles to start tasks, shuts down when frustrated, needs frequent breaks, hates writing but loves talking"
               rows={3}
               className={textareaClass}
             />
           </Field>
 
           {/* Session length */}
-          <Field label="Session length available today" required>
+          <Field label="How much time do you have today?" required>
             <select
               name="sessionLength"
               value={form.sessionLength}
@@ -231,8 +222,8 @@ export default function ProfilePage() {
 
           {/* Focus today */}
           <Field
-            label="One thing you want to focus on today"
-            hint="Your priority — what matters most right now"
+            label="What's your priority for today?"
+            hint="One thing you most want to accomplish or work on"
             required
           >
             <textarea
@@ -271,8 +262,7 @@ export default function ProfilePage() {
           </button>
 
           <p className="text-center text-xs text-[#8a8580]">
-            One-time payment. No subscription. Plan generated immediately after
-            checkout.
+            One-time payment. No subscription. Plan generated immediately after checkout.
           </p>
         </form>
       </div>
