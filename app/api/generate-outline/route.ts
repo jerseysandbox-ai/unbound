@@ -58,8 +58,12 @@ export async function POST(request: Request) {
       globalFeedback?: string;
     };
 
-    if (!paymentIntentId || !profile) {
+    // For regeneration, profile can be omitted — we'll load it from KV below
+    if (!paymentIntentId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+    if (!profile && !regenerate) {
+      return NextResponse.json({ error: "Missing profile" }, { status: 400 });
     }
 
     // Sanitize feedback to prevent prompt injection
@@ -71,10 +75,25 @@ export async function POST(request: Request) {
       ? String(globalFeedback).slice(0, MAX_FEEDBACK_CHARS)
       : undefined;
 
-    // ── Verify payment succeeded ─────────────────────────────────────────────
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-    if (paymentIntent.status !== "succeeded") {
-      return NextResponse.json({ error: "Payment has not been completed" }, { status: 402 });
+    // ── For regeneration: load profile from KV if not in request body ────────
+    // This fixes the "Session expired" bug — the profile is always stored in
+    // KV when the outline is first generated, so we never need sessionStorage.
+    let resolvedProfile = profile;
+    if (regenerate && !resolvedProfile) {
+      const storedOutline = await kv.get<{ fullProfile?: ChildProfile }>(`outline:${paymentIntentId}`);
+      if (!storedOutline?.fullProfile) {
+        return NextResponse.json({ error: "Session not found. Please start a new plan." }, { status: 404 });
+      }
+      resolvedProfile = storedOutline.fullProfile;
+    }
+
+    // ── Verify payment succeeded (skip for free sessions) ────────────────────
+    // Free sessions use a UUID prefix "free_" instead of a Stripe PI ID
+    if (!paymentIntentId.startsWith("free_")) {
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      if (paymentIntent.status !== "succeeded") {
+        return NextResponse.json({ error: "Payment has not been completed" }, { status: 402 });
+      }
     }
 
     // ── Idempotency: if outline already exists and not regenerating, skip ────
@@ -93,7 +112,7 @@ export async function POST(request: Request) {
     );
 
     // ── Run Sage + Planner (with optional feedback for regeneration) ─────────
-    const outline = await generateOutline(profile, safeTweaks, safeGlobalFeedback);
+    const outline = await generateOutline(resolvedProfile!, safeTweaks, safeGlobalFeedback);
 
     // ── Store outline in KV ──────────────────────────────────────────────────
     const safeOutline = {
@@ -101,10 +120,12 @@ export async function POST(request: Request) {
       subjects: outline.subjects,
       generatedAt: outline.generatedAt,
       profile: { childName: outline.profile.childName },
-      // Full profile stored for phase 2 use (still gated behind paymentIntentId)
-      fullProfile: profile,
+      // Full profile stored for phase 2 use and regeneration (never loses session)
+      fullProfile: resolvedProfile,
     };
     await kv.set(`outline:${paymentIntentId}`, safeOutline, { ex: KV_TTL });
+    // Also store profile separately so regeneration can always retrieve it
+    await kv.set(`profile:${paymentIntentId}`, resolvedProfile, { ex: KV_TTL });
 
     // ── Update status to outline_ready ───────────────────────────────────────
     await kv.set(
@@ -112,6 +133,20 @@ export async function POST(request: Request) {
       { phase: "outline_ready", progress: 100, message: "Your outline is ready!" },
       { ex: KV_TTL }
     );
+
+    // ── For free sessions: mark user's free plan as used ─────────────────────
+    if (paymentIntentId.startsWith("free_") && !regenerate) {
+      const userId = await kv.get<string>(`free_user:${paymentIntentId}`);
+      if (userId) {
+        // Import admin client inline to avoid circular deps
+        const { createAdminClient } = await import("@/lib/supabase/server");
+        const adminSupabase = createAdminClient();
+        await adminSupabase
+          .from("unbound_users")
+          .upsert({ id: userId, free_plan_used: true, updated_at: new Date().toISOString() })
+          .eq("id", userId);
+      }
+    }
 
     // For regeneration requests, return the outline data inline so the
     // outline page can update immediately without polling

@@ -150,6 +150,7 @@ export default function GeneratingPage() {
   const [messageIdx, setMessageIdx] = useState(0);
   const [apiMessage, setApiMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const generateCalled = useRef(false);
 
   // Rotate through status messages every 4 seconds
   useEffect(() => {
@@ -158,6 +159,36 @@ export default function GeneratingPage() {
     }, 4000);
     return () => clearInterval(timer);
   }, [messages.length]);
+
+  // When phase=outline, trigger outline generation on mount.
+  // This way the checkout page can redirect immediately after payment without
+  // waiting for the API call — the generating page owns the generation lifecycle.
+  useEffect(() => {
+    if (phase !== "outline" || !id || generateCalled.current) return;
+    generateCalled.current = true;
+
+    // Read profile from sessionStorage (set by checkout page)
+    let profile: unknown = null;
+    try {
+      const raw = sessionStorage.getItem("unbound_profile");
+      if (raw) {
+        profile = JSON.parse(raw);
+        sessionStorage.removeItem("unbound_profile");
+      }
+    } catch {
+      // Ignore parse errors
+    }
+
+    // Call generate-outline (profile may be null if navigating back to this page
+    // — in that case the API checks KV cache and returns cached: true if already done)
+    fetch("/api/generate-outline", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentIntentId: id, profile }),
+    }).catch(() => {
+      // Network errors are handled by the status poller below
+    });
+  }, [id, phase]);
 
   // Poll /api/plan-status/[id] every 2 seconds
   useEffect(() => {

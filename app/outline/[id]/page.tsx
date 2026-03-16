@@ -22,6 +22,8 @@ interface OutlineData {
   subjects: OutlineSubject[];
   profile: { childName: string };
   generatedAt: string;
+  // fullProfile is returned by get-outline and used for server-side regeneration
+  fullProfile?: unknown;
 }
 
 export default function OutlinePage() {
@@ -69,28 +71,13 @@ export default function OutlinePage() {
     setExpandedTweaks((prev) => ({ ...prev, [subject]: !prev[subject] }));
   }
 
-  // Get stored profile for regeneration (saved in sessionStorage during checkout flow)
-  function getStoredProfile() {
-    try {
-      const raw = sessionStorage.getItem("unbound_profile");
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  }
-
-  // Regenerate outline with current tweaks and global feedback
+  // Regenerate outline with current tweaks and global feedback.
+  // Profile is NOT read from sessionStorage — the server retrieves it from KV
+  // using the paymentIntentId. This fixes the "Session expired" bug.
   const handleRegenerate = useCallback(async () => {
     if (!outline) return;
     setRegenerating(true);
     setRegenError(null);
-
-    const profile = getStoredProfile();
-    if (!profile) {
-      setRegenError("Session expired. Please start over.");
-      setRegenerating(false);
-      return;
-    }
 
     // Build subject tweaks array (only include non-empty feedback)
     const tweaks = Object.entries(subjectTweaks)
@@ -103,7 +90,7 @@ export default function OutlinePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           paymentIntentId: id,
-          profile,
+          // No profile needed — server fetches it from KV using paymentIntentId
           regenerate: true,
           subjectTweaks: tweaks,
           globalFeedback: globalFeedback.trim() || undefined,

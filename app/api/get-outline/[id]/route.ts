@@ -2,7 +2,8 @@
  * GET /api/get-outline/[id]
  *
  * Returns the generated outline for the outline review page (/outline/[id]).
- * Strips the fullProfile field before returning — only safe fields go to client.
+ * Includes fullProfile so the outline page can pass it back on regeneration
+ * without needing sessionStorage (fixes "Session expired" bug).
  */
 
 import { NextResponse } from "next/server";
@@ -18,7 +19,7 @@ interface StoredOutline {
   }>;
   generatedAt: string;
   profile: { childName: string };
-  fullProfile?: unknown; // stored internally, never sent to client
+  fullProfile?: unknown; // returned to client so outline page can regenerate without sessionStorage
 }
 
 export async function GET(
@@ -37,8 +38,7 @@ export async function GET(
     return NextResponse.json({ error: "Outline not found or expired" }, { status: 404 });
   }
 
-  // Return outline data without the fullProfile (sensitive learner details)
-  const { fullProfile: _stripped, ...safeOutline } = stored;
-
-  return NextResponse.json(safeOutline);
+  // Return outline data including fullProfile — the ID itself is the auth gate
+  // (only someone who knows the paymentIntentId can access this)
+  return NextResponse.json(stored);
 }

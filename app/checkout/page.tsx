@@ -117,48 +117,16 @@ function CheckoutForm({ paymentIntentId }: { paymentIntentId: string }) {
       return;
     }
 
-    // Payment succeeded — now trigger plan generation
-    const profile = sessionStorage.getItem("unbound_profile");
-    if (!profile) {
-      setError("Session expired. Please start over.");
-      setProcessing(false);
-      return;
-    }
+    // Payment succeeded — redirect immediately to the generating page.
+    // The generating page owns the outline generation lifecycle (calls
+    // /api/generate-outline on mount). Profile stays in sessionStorage so
+    // the generating page can pass it to the API; generating page cleans up.
+    // Clean up non-essential session data now
+    sessionStorage.removeItem("unbound_pi_secret");
+    sessionStorage.removeItem("unbound_pi_id");
+    sessionStorage.removeItem("unbound_turnstile");
 
-    try {
-      // Phase 1: Generate outline (Sage + Planner only — fast ~15s)
-      // Full plan generation happens after parent reviews the outline
-      const res = await fetch("/api/generate-outline", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          paymentIntentId,
-          profile: JSON.parse(profile),
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Outline generation failed");
-      }
-
-      // Clean up session data
-      sessionStorage.removeItem("unbound_profile");
-      sessionStorage.removeItem("unbound_pi_secret");
-      sessionStorage.removeItem("unbound_pi_id");
-      sessionStorage.removeItem("unbound_turnstile");
-
-      // Navigate to outline waiting page (phase=outline)
-      router.push(`/generating/${paymentIntentId}?phase=outline`);
-    } catch (err: unknown) {
-      // Payment succeeded but outline generation failed — show recovery message
-      setError(
-        `Your payment was successful but we hit an error generating your plan. ` +
-        `Please email support@unboundlearn.co with reference ID: ${paymentIntentId} ` +
-        `and we'll get your plan to you right away.`
-      );
-      setProcessing(false);
-    }
+    router.push(`/generating/${paymentIntentId}?phase=outline`);
   }
 
   return (

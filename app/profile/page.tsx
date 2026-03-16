@@ -177,7 +177,28 @@ export default function ProfilePage() {
       sessionStorage.setItem("unbound_profile", JSON.stringify(form));
       sessionStorage.setItem("unbound_turnstile", turnstileToken);
 
-      // Create Stripe PaymentIntent server-side before redirecting to checkout
+      // Check if this is the user's first free plan
+      const checkRes = await fetch("/api/check-free-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ turnstileToken }),
+      });
+
+      if (!checkRes.ok) {
+        const data = await checkRes.json();
+        throw new Error(data.error || "Failed to check plan status");
+      }
+
+      const { isFree, freeSessionId } = await checkRes.json();
+
+      if (isFree && freeSessionId) {
+        // First plan is free — skip Stripe entirely
+        // Profile already stored in sessionStorage above for generating page to read
+        router.push(`/generating/${freeSessionId}?phase=outline`);
+        return;
+      }
+
+      // Paid plan — create Stripe PaymentIntent
       const res = await fetch("/api/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -450,11 +471,11 @@ export default function ProfilePage() {
             disabled={submitting}
             className="w-full bg-[#5b8f8a] hover:bg-[#3d6e69] disabled:opacity-60 text-white font-semibold text-lg py-4 rounded-xl transition-colors"
           >
-            {submitting ? "Setting up..." : "Continue to Payment - $9"}
+            {submitting ? "Setting up..." : "Generate My Plan →"}
           </button>
 
           <p className="text-center text-xs text-[#8a8580]">
-            One-time payment. No subscription. Plan generated immediately after checkout.
+            🎉 Your first plan is free! Plans 2+ are $9 each. No subscription ever.
           </p>
         </form>
       </div>
