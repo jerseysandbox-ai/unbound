@@ -59,14 +59,47 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing paymentIntentId" }, { status: 400 });
     }
 
-    // ── Re-verify payment with Stripe before running expensive pipeline ──────
-    // Critical: prevents free plan generation by anyone who has a paymentIntentId
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-    if (paymentIntent.status !== "succeeded") {
-      return NextResponse.json(
-        { error: "Payment has not been completed" },
-        { status: 402 }
-      );
+    // ── Verify payment / free-plan legitimacy ───────────────────────────────
+    if (paymentIntentId.startsWith("free_")) {
+      // Free plan: skip Stripe — verify via Supabase + KV instead
+      const userId = await kv.get<string>(`free_user:${paymentIntentId}`);
+
+      if (!userId) {
+        return NextResponse.json(
+          { error: "Free plan session not found or expired" },
+          { status: 404 }
+        );
+      }
+
+      // Check whether this user still has their free plan available
+      // (idempotency: if a plan already exists in KV, they already got one — allow re-fetch)
+      const existingPlanCheck = await kv.get(`plan:${paymentIntentId}`);
+      if (!existingPlanCheck) {
+        // No plan yet — verify user hasn't already used their free plan
+        const { createAdminClient } = await import("@/lib/supabase/server");
+        const adminSupabase = createAdminClient();
+        const { data: userData } = await adminSupabase
+          .from("unbound_users")
+          .select("free_plan_used")
+          .eq("id", userId)
+          .single();
+
+        if (userData?.free_plan_used) {
+          return NextResponse.json(
+            { error: "Free plan has already been used" },
+            { status: 402 }
+          );
+        }
+      }
+    } else {
+      // Paid plan: re-verify with Stripe before running expensive pipeline
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      if (paymentIntent.status !== "succeeded") {
+        return NextResponse.json(
+          { error: "Payment has not been completed" },
+          { status: 402 }
+        );
+      }
     }
 
     // ── Retrieve stored outline ──────────────────────────────────────────────
@@ -131,6 +164,19 @@ export async function POST(request: Request) {
       { phase: "complete", progress: 100, message: "Your plan is ready!" },
       { ex: KV_TTL }
     );
+
+    // ── For free sessions: mark free plan as used in Supabase ────────────────
+    if (paymentIntentId.startsWith("free_")) {
+      const userId = await kv.get<string>(`free_user:${paymentIntentId}`);
+      if (userId) {
+        const { createAdminClient } = await import("@/lib/supabase/server");
+        const adminSupabase = createAdminClient();
+        await adminSupabase
+          .from("unbound_users")
+          .upsert({ id: userId, free_plan_used: true, updated_at: new Date().toISOString() })
+          .eq("id", userId);
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
