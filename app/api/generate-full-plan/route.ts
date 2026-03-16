@@ -119,6 +119,7 @@ export async function POST(request: Request) {
       plan: generatedPlan.plan,
       childBrief: generatedPlan.childBrief,
       agentOutputs: generatedPlan.agentOutputs,
+      quote: generatedPlan.quote ?? null,
       generatedAt: generatedPlan.generatedAt,
       profile: { childName: generatedPlan.profile.childName },
     };
