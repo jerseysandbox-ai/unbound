@@ -183,7 +183,12 @@ export default function AdminDashboard() {
                   {users.map((user) => (
                     <>
                       <tr key={user.id} className="border-b border-[#f5f3f0] hover:bg-[#faf9f6]">
-                        <td className="px-5 py-3 text-[#2d2d2d] font-medium">{user.email}</td>
+                        <td className="px-5 py-3 text-[#2d2d2d] font-medium">
+                          {user.email}
+                          {ADMIN_EMAILS.includes(user.email) && (
+                            <span className="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-[#e0e7ff] text-[#3730a3]">Admin</span>
+                          )}
+                        </td>
                         <td className="px-4 py-3 text-[#8a8580]">{fmt(user.created_at)}</td>
                         <td className="px-4 py-3">
                           <span className={`text-xs font-semibold px-2 py-1 rounded-full ${user.free_plan_used ? "bg-[#fef3c7] text-[#92400e]" : "bg-[#dcfce7] text-[#166534]"}`}>
