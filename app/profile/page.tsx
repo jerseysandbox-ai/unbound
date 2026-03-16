@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import { createClient } from "@/lib/supabase/client";
 
 // Dynamically import Turnstile so it only loads client-side (no SSR)
 const TurnstileWidget = dynamic(() => import("@/components/TurnstileWidget"), {
@@ -29,12 +30,15 @@ type SavedProfile = Pick<
   "childName" | "gradeLevel" | "interests" | "learningChallenges" | "learningStyleNotes"
 >;
 
-const LS_KEY = "unbound_learner_profile";
+// Key is namespaced by user ID so profiles never bleed between accounts
+function getLsKey(userId: string) {
+  return `unbound_learner_profile_${userId}`;
+}
 
 // Safe localStorage read for SSR environments
-function readSavedProfile(): SavedProfile | null {
+function readSavedProfile(userId: string): SavedProfile | null {
   try {
-    const raw = localStorage.getItem(LS_KEY);
+    const raw = localStorage.getItem(getLsKey(userId));
     return raw ? (JSON.parse(raw) as SavedProfile) : null;
   } catch {
     return null;
@@ -42,9 +46,9 @@ function readSavedProfile(): SavedProfile | null {
 }
 
 // Safe localStorage write
-function saveLearnerProfile(profile: SavedProfile): void {
+function saveLearnerProfile(userId: string, profile: SavedProfile): void {
   try {
-    localStorage.setItem(LS_KEY, JSON.stringify(profile));
+    localStorage.setItem(getLsKey(userId), JSON.stringify(profile));
   } catch {
     // Silently ignore storage failures
   }
@@ -84,6 +88,8 @@ const GRADE_OPTIONS = [
 export default function ProfilePage() {
   const router = useRouter();
 
+  const [userId, setUserId] = useState<string | null>(null);
+
   // Whether Layer 1 section is expanded for editing
   const [layer1Expanded, setLayer1Expanded] = useState(true);
   const [hasSavedProfile, setHasSavedProfile] = useState(false);
@@ -105,21 +111,27 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // On mount, load saved Layer 1 profile from localStorage
+  // On mount, get user ID then load their saved Layer 1 profile from localStorage
   useEffect(() => {
-    const saved = readSavedProfile();
-    if (saved) {
-      setHasSavedProfile(true);
-      setLayer1Expanded(false); // Collapse Layer 1 on return visits
-      setForm((prev) => ({
-        ...prev,
-        childName: saved.childName || prev.childName,
-        gradeLevel: saved.gradeLevel || prev.gradeLevel,
-        interests: saved.interests || prev.interests,
-        learningChallenges: saved.learningChallenges || prev.learningChallenges,
-        learningStyleNotes: saved.learningStyleNotes || prev.learningStyleNotes,
-      }));
-    }
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      const uid = data.user?.id ?? null;
+      setUserId(uid);
+      if (!uid) return;
+      const saved = readSavedProfile(uid);
+      if (saved) {
+        setHasSavedProfile(true);
+        setLayer1Expanded(false); // Collapse Layer 1 on return visits
+        setForm((prev) => ({
+          ...prev,
+          childName: saved.childName || prev.childName,
+          gradeLevel: saved.gradeLevel || prev.gradeLevel,
+          interests: saved.interests || prev.interests,
+          learningChallenges: saved.learningChallenges || prev.learningChallenges,
+          learningStyleNotes: saved.learningStyleNotes || prev.learningStyleNotes,
+        }));
+      }
+    });
   }, []);
 
   function handleChange(
@@ -164,14 +176,16 @@ export default function ProfilePage() {
     setSubmitting(true);
 
     try {
-      // Persist Layer 1 to localStorage for next visit
-      saveLearnerProfile({
-        childName: form.childName,
-        gradeLevel: form.gradeLevel,
-        interests: form.interests,
-        learningChallenges: form.learningChallenges,
-        learningStyleNotes: form.learningStyleNotes,
-      });
+      // Persist Layer 1 to localStorage, keyed by user ID so profiles never bleed between accounts
+      if (userId) {
+        saveLearnerProfile(userId, {
+          childName: form.childName,
+          gradeLevel: form.gradeLevel,
+          interests: form.interests,
+          learningChallenges: form.learningChallenges,
+          learningStyleNotes: form.learningStyleNotes,
+        });
+      }
 
       // Store full profile in sessionStorage for payment flow
       sessionStorage.setItem("unbound_profile", JSON.stringify(form));
