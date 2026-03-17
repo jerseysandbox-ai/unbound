@@ -63,8 +63,8 @@ export async function GET(
     ownerId = await kv.get<string>(`free_user:${id}`);
   }
 
-  // Enforce ownership if we can determine the owner
-  if (ownerId && ownerId !== user.id) {
+  // Fail closed — if we can't verify ownership, deny
+  if (!ownerId || ownerId !== user.id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
