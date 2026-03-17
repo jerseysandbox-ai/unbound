@@ -1,14 +1,17 @@
 /**
- * Next.js middleware — refreshes Supabase auth session and protects routes.
+ * Next.js middleware (proxy.ts) — refreshes Supabase auth session and protects routes.
  *
- * Protected routes: /profile, /checkout, /generating, /outline, /plan
- * Redirects unauthenticated users to /login.
+ * Page routes: redirect unauthenticated users to /login.
+ * API routes: return 401 JSON if not authenticated.
+ *
+ * Public (no auth required):
+ *   /, /login, /signup, /confirm, /privacy, /reset-password, /api/webhook/stripe
  */
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// Routes that require authentication
-const PROTECTED_PREFIXES = [
+// Page routes that require authentication — redirect to /login if not authed
+const PROTECTED_PAGE_PREFIXES = [
   "/profile",
   "/checkout",
   "/generating",
@@ -16,9 +19,18 @@ const PROTECTED_PREFIXES = [
   "/plan",
 ];
 
+// API routes that require authentication — return 401 if not authed
+const PROTECTED_API_PREFIXES = [
+  "/api/generate-outline",
+  "/api/generate-full-plan",
+  "/api/check-free-plan",
+  "/api/get-outline/",
+  "/api/get-plan/",
+  "/api/plan-status/",
+];
+
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -46,15 +58,21 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Check if this is a protected route
-  const isProtected = PROTECTED_PREFIXES.some((prefix) =>
-    pathname.startsWith(prefix)
-  );
+  // ── Protected API routes — return 401 if unauthenticated ───────────────
+  if (PROTECTED_API_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
+    if (!user) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+    return supabaseResponse;
+  }
 
-  if (isProtected && !user) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
+  // ── Protected page routes — redirect to /login if unauthenticated ──────
+  if (PROTECTED_PAGE_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
+    if (!user) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("next", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
   return supabaseResponse;
