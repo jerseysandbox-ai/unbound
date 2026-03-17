@@ -11,6 +11,11 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
+  // Disabled in production — gate behind env var to prevent accidental re-runs
+  if (process.env.ENABLE_INIT_DB !== "true") {
+    return NextResponse.json({ error: "Method Not Allowed" }, { status: 405 });
+  }
+
   // Simple secret guard — not auth-based since auth tables don't exist yet
   const secret = request.headers.get("x-init-secret");
   if (!secret || secret !== process.env.INIT_DB_SECRET) {
