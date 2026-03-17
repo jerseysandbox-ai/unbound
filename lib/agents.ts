@@ -139,6 +139,26 @@ function formatProfile(profile: ChildProfile): string {
     lines.push(`Energy Today: ${energyLabels[profile.energyCheck] || profile.energyCheck}`);
   }
 
+  // Materials — if none specified, default to printer-free household-only constraint
+  const hasMaterials = (profile.materialsAvailable?.length ?? 0) > 0 || profile.materialsNotes?.trim();
+  if (hasMaterials) {
+    const materialsList = profile.materialsAvailable?.join(", ") || "";
+    lines.push(`Materials Available: ${materialsList}`);
+    if (profile.materialsNotes?.trim()) {
+      lines.push(`Materials Notes: ${profile.materialsNotes}`);
+    }
+    // If printer not in list, make that explicit
+    if (!profile.materialsAvailable?.includes("Printer and paper")) {
+      lines.push(`CONSTRAINT - No printer: Design all activities without any printing. Use verbal, hands-on, or written-by-hand approaches only.`);
+    }
+  } else {
+    lines.push(`Materials: No printer assumed. Use only basic household items (paper, pencil, everyday objects). Do not require any materials purchase. No printed worksheets.`);
+  }
+
+  if (profile.stateStandards?.trim()) {
+    lines.push(`State Standards to Align:\n${profile.stateStandards}`);
+  }
+
   return lines.join("\n");
 }
 

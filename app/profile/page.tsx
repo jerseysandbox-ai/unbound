@@ -17,6 +17,9 @@ export interface ChildProfile {
   interests: string;
   learningChallenges: string;
   learningStyleNotes: string; // optional free text
+  materialsAvailable?: string[]; // checkboxes of available materials
+  materialsNotes?: string; // anything to avoid or extra info
+  stateStandards?: string; // optional paste-in standards
 
   // Layer 2 - Today's Session (always fresh)
   sessionLength: string;
@@ -27,7 +30,7 @@ export interface ChildProfile {
 // The subset stored in localStorage (Layer 1 only)
 type SavedProfile = Pick<
   ChildProfile,
-  "childName" | "gradeLevel" | "interests" | "learningChallenges" | "learningStyleNotes"
+  "childName" | "gradeLevel" | "interests" | "learningChallenges" | "learningStyleNotes" | "materialsAvailable" | "materialsNotes" | "stateStandards"
 >;
 
 // Key is namespaced by user ID so profiles never bleed between accounts
@@ -100,6 +103,9 @@ export default function ProfilePage() {
     interests: "",
     learningChallenges: "",
     learningStyleNotes: "",
+    materialsAvailable: [],
+    materialsNotes: "",
+    stateStandards: "",
     sessionLength: "1hour",
     focusToday: "",
     energyCheck: "ready",
@@ -129,6 +135,9 @@ export default function ProfilePage() {
           interests: saved.interests || prev.interests,
           learningChallenges: saved.learningChallenges || prev.learningChallenges,
           learningStyleNotes: saved.learningStyleNotes || prev.learningStyleNotes,
+          materialsAvailable: saved.materialsAvailable ?? prev.materialsAvailable,
+          materialsNotes: saved.materialsNotes ?? prev.materialsNotes,
+          stateStandards: saved.stateStandards ?? prev.stateStandards,
         }));
       }
     });
@@ -140,6 +149,18 @@ export default function ProfilePage() {
     >
   ) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  function handleMaterialToggle(value: string) {
+    setForm((prev) => {
+      const current = prev.materialsAvailable ?? [];
+      return {
+        ...prev,
+        materialsAvailable: current.includes(value)
+          ? current.filter((v) => v !== value)
+          : [...current, value],
+      };
+    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -158,7 +179,7 @@ export default function ProfilePage() {
     }
 
     // Validate required fields
-    const required: (keyof ChildProfile)[] = [
+    const requiredStrings: (keyof ChildProfile)[] = [
       "childName",
       "gradeLevel",
       "interests",
@@ -166,8 +187,9 @@ export default function ProfilePage() {
       "focusToday",
       "energyCheck",
     ];
-    for (const field of required) {
-      if (!form[field]?.trim()) {
+    for (const field of requiredStrings) {
+      const val = form[field];
+      if (typeof val === "string" && !val.trim()) {
         setError("Please fill in all required fields.");
         return;
       }
@@ -184,6 +206,9 @@ export default function ProfilePage() {
           interests: form.interests,
           learningChallenges: form.learningChallenges,
           learningStyleNotes: form.learningStyleNotes,
+          materialsAvailable: form.materialsAvailable,
+          materialsNotes: form.materialsNotes,
+          stateStandards: form.stateStandards,
         });
       }
 
@@ -365,6 +390,61 @@ export default function ProfilePage() {
                     onChange={handleChange}
                     placeholder="e.g. Visual learner, hates worksheets, loves building things, needs movement breaks every 20 min"
                     rows={2}
+                    className={textareaClass}
+                  />
+                </Field>
+
+                {/* Materials available */}
+                <div>
+                  <label className="block text-sm font-medium text-[#2d2d2d] mb-1">
+                    What materials do you have at home?
+                  </label>
+                  <p className="text-xs text-[#8a8580] mb-2">
+                    Optional — helps us design lessons around what you actually have
+                  </p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {[
+                      "Printer and paper",
+                      "Art supplies (crayons, markers, paint)",
+                      "Basic craft supplies (scissors, glue, tape)",
+                      "Building materials (LEGO, blocks, cardboard)",
+                      "Outdoor / garden space",
+                      "Musical instrument",
+                      "Ruler, compass, or measuring tools",
+                      "Dice or playing cards",
+                    ].map((material) => (
+                      <label key={material} className="flex items-center gap-2 cursor-pointer text-sm text-[#2d2d2d]">
+                        <input
+                          type="checkbox"
+                          checked={(form.materialsAvailable ?? []).includes(material)}
+                          onChange={() => handleMaterialToggle(material)}
+                          className="h-4 w-4 rounded border-[#e0dbd5] accent-[#5b8f8a] cursor-pointer"
+                        />
+                        {material}
+                      </label>
+                    ))}
+                  </div>
+                  <textarea
+                    name="materialsNotes"
+                    value={form.materialsNotes}
+                    onChange={handleChange}
+                    placeholder="Anything else you have, or anything to avoid? e.g. no glue, we have a microscope, avoid screens"
+                    rows={2}
+                    className={`${textareaClass} mt-2`}
+                  />
+                </div>
+
+                {/* State standards - optional */}
+                <Field
+                  label="State learning standards"
+                  hint="Optional — paste any standards you want today's plan to align with"
+                >
+                  <textarea
+                    name="stateStandards"
+                    value={form.stateStandards}
+                    onChange={handleChange}
+                    placeholder="e.g. CCSS.MATH.CONTENT.4.OA.A.1 — Interpret a multiplication equation as a comparison"
+                    rows={3}
                     className={textareaClass}
                   />
                 </Field>
