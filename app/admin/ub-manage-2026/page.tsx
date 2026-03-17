@@ -10,8 +10,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-
-const ADMIN_EMAILS = ["matthewnbrown@gmail.com", "nicoleannenewman@gmail.com"];
+import { ADMIN_EMAILS } from "@/lib/config";
 
 interface Plan {
   id: string;
