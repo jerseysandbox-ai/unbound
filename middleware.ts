@@ -29,7 +29,7 @@ const PROTECTED_API_PREFIXES = [
   "/api/plan-status/",
 ];
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
