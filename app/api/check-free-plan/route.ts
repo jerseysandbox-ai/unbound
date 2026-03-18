@@ -66,10 +66,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    // Check free_plan_used in Supabase
+    // Check free_plan_used and is_unlimited in Supabase
     const { data: userData, error: dbError } = await supabase
       .from("unbound_users")
-      .select("free_plan_used")
+      .select("free_plan_used, is_unlimited")
       .eq("id", user.id)
       .single();
 
@@ -97,8 +97,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ isFree: true, freeSessionId });
     }
 
+    // Unlimited accounts (e.g. Nicole testing) always get a free session
+    if (userData.is_unlimited) {
+      const freeSessionId = `free_${randomUUID()}`;
+      await kv.set(`status:${freeSessionId}`, { phase: "pending", progress: 0 }, { ex: KV_TTL });
+      await kv.set(`free_user:${freeSessionId}`, user.id, { ex: KV_TTL });
+      return NextResponse.json({ isFree: true, freeSessionId });
+    }
+
     if (userData.free_plan_used) {
-      // User has already used their free plan
+      // User has already used their free plan — proceed to Stripe
       return NextResponse.json({ isFree: false });
     }
 
