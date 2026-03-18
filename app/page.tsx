@@ -9,6 +9,79 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+// ─── Subject icons — clean SVG line icons in brand teal ──────────────────────
+
+const IconMath = () => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+    <path d="M4 10h12M10 4v12M5 5l10 10M15 5L5 15" />
+  </svg>
+);
+
+const IconScience = () => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+    <path d="M7 3v7.5L3.5 16.5a1 1 0 00.9 1.5h11.2a1 1 0 00.9-1.5L13 10.5V3" />
+    <path d="M7 3h6M5.5 14h9" />
+    <circle cx="12" cy="13" r="0.8" fill="currentColor" stroke="none" />
+    <circle cx="8.5" cy="15" r="0.6" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+const IconLanguageArts = () => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+    <path d="M4 6h12M4 10h8M4 14h5" />
+    <path d="M14 12l1.5 4M14 12l-1.5 4M13 15h3" />
+  </svg>
+);
+
+const IconSocialStudies = () => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+    <circle cx="10" cy="10" r="7.5" />
+    <path d="M10 2.5c0 0-3 3-3 7.5s3 7.5 3 7.5M10 2.5c0 0 3 3 3 7.5s-3 7.5-3 7.5M2.5 10h15" />
+  </svg>
+);
+
+const IconSEL = () => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+    <path d="M10 17s-7-4.35-7-8.5a4.5 4.5 0 018.07-2.76A4.5 4.5 0 0117 8.5C17 12.65 10 17 10 17z" />
+  </svg>
+);
+
+const IconArts = () => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+    <circle cx="10" cy="10" r="7.5" />
+    <circle cx="7.5" cy="8.5" r="1.2" fill="currentColor" stroke="none" />
+    <circle cx="12.5" cy="7" r="1" fill="currentColor" stroke="none" />
+    <circle cx="14" cy="12" r="1" fill="currentColor" stroke="none" />
+    <circle cx="8" cy="13.5" r="1.2" fill="currentColor" stroke="none" />
+    <path d="M10 18a2 2 0 002-2H8a2 2 0 002 2z" />
+  </svg>
+);
+
+const IconEntrepreneurship = () => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+    <path d="M10 2.5v3M10 14.5v3M4.2 4.2l2.1 2.1M13.7 13.7l2.1 2.1M2.5 10h3M14.5 10h3M4.2 15.8l2.1-2.1M13.7 6.3l2.1-2.1" />
+    <circle cx="10" cy="10" r="3" />
+  </svg>
+);
+
+const IconPacing = () => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+    <circle cx="10" cy="10" r="7.5" />
+    <path d="M10 6v4l2.5 2.5" />
+  </svg>
+);
+
+const PLAN_SUBJECTS = [
+  { icon: <IconMath />, label: "Math" },
+  { icon: <IconScience />, label: "Science" },
+  { icon: <IconLanguageArts />, label: "Language Arts" },
+  { icon: <IconSocialStudies />, label: "Social Studies" },
+  { icon: <IconSEL />, label: "SEL + Life Skills" },
+  { icon: <IconArts />, label: "Arts & Creative Expression" },
+  { icon: <IconEntrepreneurship />, label: "Entrepreneurship" },
+  { icon: <IconPacing />, label: "Pacing built around your child" },
+];
+
 export default function HomePage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [authLoaded, setAuthLoaded] = useState(false);
@@ -145,22 +218,13 @@ export default function HomePage() {
             What&apos;s in your plan
           </h2>
           <div className="grid sm:grid-cols-2 gap-4">
-            {[
-              { icon: "📐", label: "Math" },
-              { icon: "📖", label: "Science" },
-              { icon: "✍️", label: "Language Arts" },
-              { icon: "🌍", label: "Social Studies" },
-              { icon: "❤️", label: "SEL + Life Skills" },
-              { icon: "🎨", label: "Arts & Creative Expression" },
-              { icon: "💡", label: "Entrepreneurship" },
-              { icon: "🧠", label: "Pacing built around your child" },
-            ].map(({ icon, label }) => (
+            {PLAN_SUBJECTS.map(({ icon, label }) => (
               <div
                 key={label}
-                className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-sm"
+                className="flex items-center gap-3 bg-white rounded-xl px-4 py-3.5 shadow-sm border border-[#ddf0ee]"
               >
-                <span className="text-xl">{icon}</span>
-                <span className="text-[#2d2d2d] font-medium">{label}</span>
+                <span className="text-[#5b8f8a] shrink-0 w-5 h-5">{icon}</span>
+                <span className="text-[#2d2d2d] font-medium text-sm">{label}</span>
               </div>
             ))}
           </div>
