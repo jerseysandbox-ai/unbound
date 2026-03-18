@@ -73,6 +73,14 @@ export async function POST(request: Request) {
       .eq("id", user.id)
       .single();
 
+    // Unlimited accounts bypass ALL claim checks — generate fresh session every time
+    if (!dbError && userData?.is_unlimited) {
+      const freeSessionId = `free_${randomUUID()}`;
+      await kv.set(`status:${freeSessionId}`, { phase: "pending", progress: 0 }, { ex: KV_TTL });
+      await kv.set(`free_user:${freeSessionId}`, user.id, { ex: KV_TTL });
+      return NextResponse.json({ isFree: true, freeSessionId });
+    }
+
     if (dbError || !userData) {
       // User row may not exist yet (race condition on signup trigger)
       // Default to allowing free plan — generate session and claim atomically
@@ -85,21 +93,12 @@ export async function POST(request: Request) {
         { nx: true, ex: KV_TTL }
       );
       if (claimed === null) {
-        // Another concurrent request already claimed the free plan
         return NextResponse.json(
           { error: "Free plan already being generated" },
           { status: 409 }
         );
       }
 
-      await kv.set(`status:${freeSessionId}`, { phase: "pending", progress: 0 }, { ex: KV_TTL });
-      await kv.set(`free_user:${freeSessionId}`, user.id, { ex: KV_TTL });
-      return NextResponse.json({ isFree: true, freeSessionId });
-    }
-
-    // Unlimited accounts (e.g. Nicole testing) always get a free session
-    if (userData.is_unlimited) {
-      const freeSessionId = `free_${randomUUID()}`;
       await kv.set(`status:${freeSessionId}`, { phase: "pending", progress: 0 }, { ex: KV_TTL });
       await kv.set(`free_user:${freeSessionId}`, user.id, { ex: KV_TTL });
       return NextResponse.json({ isFree: true, freeSessionId });
@@ -119,16 +118,13 @@ export async function POST(request: Request) {
       { nx: true, ex: KV_TTL }
     );
     if (claimed === null) {
-      // Another concurrent request already claimed the free plan slot
       return NextResponse.json(
         { error: "Free plan already being generated" },
         { status: 409 }
       );
     }
 
-    // Store pending status so polling page doesn't error immediately
     await kv.set(`status:${freeSessionId}`, { phase: "pending", progress: 0 }, { ex: KV_TTL });
-    // Store userId so generate-outline can mark free plan as used after generation
     await kv.set(`free_user:${freeSessionId}`, user.id, { ex: KV_TTL });
 
     return NextResponse.json({ isFree: true, freeSessionId });
