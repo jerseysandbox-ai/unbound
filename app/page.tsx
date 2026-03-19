@@ -161,14 +161,13 @@ export default function HomePage() {
         <div className="inline-block bg-[#e8f4f3] text-[#3d6e69] text-sm font-medium px-3 py-1 rounded-full mb-4 ml-2">
           Personalized homeschool plans, instantly
         </div>
-        <h1 className="text-4xl sm:text-5xl font-bold text-[#2d2d2d] leading-tight mb-6">
-          A lesson plan made{" "}
-          <span className="text-[#5b8f8a]">just for your child.</span>
+        <h1 className="font-display text-4xl sm:text-5xl font-bold text-[#2d2d2d] leading-tight mb-6">
+          Every lesson plan,{" "}
+          <span className="text-[#1a5c5a]">made for your child.</span>
         </h1>
         <p className="text-lg text-[#8a8580] mb-10 leading-relaxed">
-          Tell us about your learner. Get a full personalized daily plan crafted
-          by a team of AI specialists, built around their interests, their pace,
-          and your goals for today.
+          Tell us about your learner and get a full personalized daily plan built
+          around their interests, their pace, and your goals for today.
         </p>
 
         <Link
@@ -178,7 +177,7 @@ export default function HomePage() {
           {userEmail ? "Create Today's Plan" : "Get Started - First Plan Free"}
         </Link>
         <p className="mt-4 text-sm text-[#8a8580]">
-          First plan free · Plan 2+ just $9 each · No subscription
+          First plan free · $19/month after · Cancel anytime
         </p>
       </section>
 
@@ -202,7 +201,7 @@ export default function HomePage() {
             {
               step: "3",
               title: "Download your plan",
-              desc: "9 specialized AI agents collaborate to create a warm, detailed daily plan with activities for every subject.",
+              desc: "Your plan arrives with lessons for every subject, tailored to your child's interests, pace, and today's goals.",
             },
           ].map(({ step, title, desc }) => (
             <div key={step} className="text-center">

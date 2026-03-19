@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+
+/** Display font for hero headlines — gives warmth and editorial weight */
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  weight: ["700", "800"],
+});
 
 export const metadata: Metadata = {
   title: "Unbound: Personalized Homeschool Plans for Neurodivergent Kids",
@@ -31,7 +38,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={`${inter.variable} ${playfair.variable} font-sans`}>{children}</body>
     </html>
   );
 }
