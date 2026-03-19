@@ -89,14 +89,37 @@ function ScribeIllustration() {
       <circle cx="107" cy="92" r="1.5" fill="#5b8f8a" stroke="none" />
       <path d="M93 100 Q100 105 107 100" strokeWidth="1.4" />
 
-      {/* Quill pen - right hand holding it */}
-      <path d="M132 145 Q145 120 150 100" strokeWidth="1.6" />
-      <path d="M150 100 Q160 85 155 75 Q148 80 145 90 Q143 97 150 100" fill="#e8f4f3" />
-      {/* Quill feather detail */}
-      <path d="M155 75 Q152 82 148 88" strokeWidth="0.8" />
-      <path d="M153 77 Q150 83 147 89" strokeWidth="0.8" />
-      {/* Ink point */}
-      <path d="M132 145 L130 149" strokeWidth="1.8" />
+      {/* Quill pen — proper feather with spine, barbs, and nib */}
+      {/* Quill shaft / spine running from nib up through feather */}
+      <path d="M131 148 Q139 130 147 112 Q153 98 157 82" strokeWidth="1.4" stroke="#5b8f8a" />
+
+      {/* Feather body — right side barbs fanning out from spine */}
+      <path
+        d="M157 82 Q168 72 172 62 Q165 68 158 78 Q153 86 149 96 Q154 84 162 72 Q156 80 150 92"
+        fill="#e8f4f3" stroke="#5b8f8a" strokeWidth="0.9"
+      />
+      {/* Feather body — left side barbs */}
+      <path
+        d="M157 82 Q148 70 146 60 Q149 72 152 84 Q147 74 148 62 Q150 76 153 88"
+        fill="#e8f4f3" stroke="#5b8f8a" strokeWidth="0.9"
+      />
+      {/* Feather tip — pointed top of quill */}
+      <path d="M157 82 Q163 68 162 58 Q158 66 156 76" fill="#d4ecea" stroke="#5b8f8a" strokeWidth="0.8" />
+
+      {/* Barb detail lines — right side */}
+      <path d="M156 84 Q163 77 166 70" strokeWidth="0.6" stroke="#5b8f8a" opacity="0.7" />
+      <path d="M153 90 Q161 82 165 74" strokeWidth="0.6" stroke="#5b8f8a" opacity="0.7" />
+      <path d="M151 96 Q158 88 162 80" strokeWidth="0.6" stroke="#5b8f8a" opacity="0.7" />
+      <path d="M149 102 Q155 94 158 86" strokeWidth="0.6" stroke="#5b8f8a" opacity="0.6" />
+
+      {/* Barb detail lines — left side */}
+      <path d="M155 87 Q150 80 149 72" strokeWidth="0.6" stroke="#5b8f8a" opacity="0.7" />
+      <path d="M153 93 Q148 85 148 76" strokeWidth="0.6" stroke="#5b8f8a" opacity="0.7" />
+      <path d="M151 99 Q147 91 147 82" strokeWidth="0.6" stroke="#5b8f8a" opacity="0.6" />
+
+      {/* Nib — tapered pointed tip where ink meets paper */}
+      <path d="M131 148 Q133 143 136 138 Q138 134 139 130" strokeWidth="1.6" stroke="#3d6e69" />
+      <path d="M131 148 L129 152" strokeWidth="1.8" stroke="#3d6e69" strokeLinecap="round" />
 
       {/* Candle - left side of desk */}
       <rect x="42" y="145" width="12" height="18" rx="1" fill="#fef9e7" stroke="#5b8f8a" strokeWidth="1.2" />
