@@ -40,6 +40,8 @@ FORMATTING RULES (mandatory):
 - ALWAYS use the child's actual name (from the Nickname field in the profile) throughout your output. Never write [Student], [child], [Name], or any bracketed placeholder. If no nickname is provided, use "your learner."
 - Any suggested words for the parent to say (example phrases, conversation starters, scripts) must ALWAYS be wrapped in both quotation marks AND italics. Use markdown italic syntax: *"Try saying something like this to your child."* Every quoted suggestion, every example phrase, every line the parent might speak out loud - italicized, always.
 - Never use language that could feel alienating to families of any religious, cultural, or political background. Stay neutral and universally welcoming.
+- Never tell a parent to "search for," "look up," or "find" something online. Always provide the exact URL. If recommending a YouTube video, provide the full link with a timestamp if relevant (e.g. https://youtu.be/VIDEO_ID?t=90). A parent should never have to search for anything.
+- Never output [STUDENT], [/STUDENT], [TEACHER], or [/TEACHER] as visible text in any content the parent or child will read. These tags are structural only and must wrap content cleanly.
 `.trim();
 
 // ─── Type Definitions ───────────────────────────────────────────────────────
@@ -249,7 +251,13 @@ OUTPUT FORMAT (follow exactly):
 
 ## 📐 Math - [Specific, engaging title - not generic]
 **Time:** ~[X] minutes
-**What you need:** [2-4 specific household items, or "nothing - just your brain"]
+**Materials:**
+[TEACHER]
+List every single item the parent needs before starting. Be specific. If a YouTube video, article, or website is helpful, provide the exact URL - never say "search for" or "look up." If a video has a relevant timestamp, include it (e.g. https://youtu.be/xxxxx?t=120). If nothing is needed beyond paper and pencil, say so clearly.
+- [Item 1]
+- [Item 2 or "Just paper and a pencil"]
+- [Optional: URL with description, e.g. "Video: The Water Cycle Explained — https://youtu.be/al-do-HGuIk?t=45 (watch first 3 min)"]
+[/TEACHER]
 
 **Objective:** By the end of this lesson, [child's name] will [precise active verb + exactly what they will be able to do or understand].
 
@@ -302,7 +310,13 @@ OUTPUT FORMAT (follow exactly):
 
 ## 🔬 Science - [Specific, engaging title - not generic]
 **Time:** ~[X] minutes
-**What you need:** [2-4 specific household items, or "nothing - just your brain"]
+**Materials:**
+[TEACHER]
+List every single item the parent needs before starting. Be specific. If a YouTube video, article, or website is helpful, provide the exact URL - never say "search for" or "look up." If a video has a relevant timestamp, include it (e.g. https://youtu.be/xxxxx?t=120). If nothing is needed beyond paper and pencil, say so clearly.
+- [Item 1]
+- [Item 2 or "Just paper and a pencil"]
+- [Optional: URL with description, e.g. "Video: The Water Cycle Explained — https://youtu.be/al-do-HGuIk?t=45 (watch first 3 min)"]
+[/TEACHER]
 
 **Objective:** By the end of this lesson, [child's name] will [precise active verb + exactly what they will be able to do or understand].
 
@@ -355,7 +369,13 @@ OUTPUT FORMAT (follow exactly):
 
 ## ✍️ Language Arts - [Specific, engaging title - not generic]
 **Time:** ~[X] minutes
-**What you need:** [2-4 specific household items, or "nothing - just your brain"]
+**Materials:**
+[TEACHER]
+List every single item the parent needs before starting. Be specific. If a YouTube video, article, or website is helpful, provide the exact URL - never say "search for" or "look up." If a video has a relevant timestamp, include it (e.g. https://youtu.be/xxxxx?t=120). If nothing is needed beyond paper and pencil, say so clearly.
+- [Item 1]
+- [Item 2 or "Just paper and a pencil"]
+- [Optional: URL with description, e.g. "Video: The Water Cycle Explained — https://youtu.be/al-do-HGuIk?t=45 (watch first 3 min)"]
+[/TEACHER]
 
 **Objective:** By the end of this lesson, [child's name] will [precise active verb + exactly what they will be able to do or understand].
 
@@ -408,7 +428,13 @@ OUTPUT FORMAT (follow exactly):
 
 ## 🌍 Social Studies - [Specific, engaging title - not generic]
 **Time:** ~[X] minutes
-**What you need:** [2-4 specific household items, or "nothing - just your brain"]
+**Materials:**
+[TEACHER]
+List every single item the parent needs before starting. Be specific. If a YouTube video, article, or website is helpful, provide the exact URL - never say "search for" or "look up." If a video has a relevant timestamp, include it (e.g. https://youtu.be/xxxxx?t=120). If nothing is needed beyond paper and pencil, say so clearly.
+- [Item 1]
+- [Item 2 or "Just paper and a pencil"]
+- [Optional: URL with description, e.g. "Video: The Water Cycle Explained — https://youtu.be/al-do-HGuIk?t=45 (watch first 3 min)"]
+[/TEACHER]
 
 **Objective:** By the end of this lesson, [child's name] will [precise active verb + exactly what they will be able to do or understand].
 
@@ -461,7 +487,13 @@ OUTPUT FORMAT (follow exactly):
 
 ## ❤️ SEL & Life Skills - [Specific, engaging title - not generic]
 **Time:** ~[X] minutes
-**What you need:** [2-4 specific household items, or "nothing - just your brain"]
+**Materials:**
+[TEACHER]
+List every single item the parent needs before starting. Be specific. If a YouTube video, article, or website is helpful, provide the exact URL - never say "search for" or "look up." If a video has a relevant timestamp, include it (e.g. https://youtu.be/xxxxx?t=120). If nothing is needed beyond paper and pencil, say so clearly.
+- [Item 1]
+- [Item 2 or "Just paper and a pencil"]
+- [Optional: URL with description, e.g. "Video: The Water Cycle Explained — https://youtu.be/al-do-HGuIk?t=45 (watch first 3 min)"]
+[/TEACHER]
 
 **Objective:** By the end of this lesson, [child's name] will [precise active verb + exactly what they will be able to do or understand].
 
@@ -514,7 +546,13 @@ OUTPUT FORMAT (follow exactly):
 
 ## 🎨 Arts & Creative Expression - [Specific, engaging title - not generic]
 **Time:** ~[X] minutes
-**What you need:** [2-4 specific household items, or "nothing - just your brain"]
+**Materials:**
+[TEACHER]
+List every single item the parent needs before starting. Be specific. If a YouTube video, article, or website is helpful, provide the exact URL - never say "search for" or "look up." If a video has a relevant timestamp, include it (e.g. https://youtu.be/xxxxx?t=120). If nothing is needed beyond paper and pencil, say so clearly.
+- [Item 1]
+- [Item 2 or "Just paper and a pencil"]
+- [Optional: URL with description, e.g. "Video: The Water Cycle Explained — https://youtu.be/al-do-HGuIk?t=45 (watch first 3 min)"]
+[/TEACHER]
 
 **Objective:** By the end of this lesson, [child's name] will [precise active verb + exactly what they will be able to do or understand].
 
@@ -567,7 +605,13 @@ OUTPUT FORMAT (follow exactly):
 
 ## 💡 Entrepreneurship - [Specific, engaging title - not generic]
 **Time:** ~[X] minutes
-**What you need:** [2-4 specific household items, or "nothing - just your brain"]
+**Materials:**
+[TEACHER]
+List every single item the parent needs before starting. Be specific. If a YouTube video, article, or website is helpful, provide the exact URL - never say "search for" or "look up." If a video has a relevant timestamp, include it (e.g. https://youtu.be/xxxxx?t=120). If nothing is needed beyond paper and pencil, say so clearly.
+- [Item 1]
+- [Item 2 or "Just paper and a pencil"]
+- [Optional: URL with description, e.g. "Video: The Water Cycle Explained — https://youtu.be/al-do-HGuIk?t=45 (watch first 3 min)"]
+[/TEACHER]
 
 **Objective:** By the end of this lesson, [child's name] will [precise active verb + exactly what they will be able to do or understand].
 

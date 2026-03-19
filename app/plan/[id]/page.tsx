@@ -48,11 +48,12 @@ function SubjectIcon({ subject }: { subject: string }) {
 
 function extractTeacherContent(plan: string): string {
   return plan
-    // Remove [STUDENT]...[/STUDENT] blocks entirely
-    .replace(/\[STUDENT\][\s\S]*?\[\/STUDENT\]/g, "")
-    // Strip [TEACHER] tags, keeping inner content
-    .replace(/\[TEACHER\]/g, "")
-    .replace(/\[\/TEACHER\]/g, "")
+    // Remove [STUDENT]...[/STUDENT] blocks entirely (handles whitespace/newlines around tags)
+    .replace(/\[\s*STUDENT\s*\][\s\S]*?\[\s*\/STUDENT\s*\]/gi, "")
+    // Strip any orphaned [STUDENT] or [/STUDENT] tags that weren't closed properly
+    .replace(/\[\s*\/?STUDENT\s*\]/gi, "")
+    // Strip [TEACHER] / [/TEACHER] tags, keeping inner content
+    .replace(/\[\s*\/?TEACHER\s*\]/gi, "")
     // Clean up extra blank lines from removed blocks
     .replace(/\n{3,}/g, "\n\n")
     .trim();
