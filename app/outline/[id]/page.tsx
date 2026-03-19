@@ -117,31 +117,27 @@ export default function OutlinePage() {
     }
   }, [outline, id, subjectTweaks, globalFeedback]);
 
-  // Trigger full plan generation and redirect to generating page
-  async function handleBuildPlan() {
+  // Trigger full plan generation and redirect immediately to the scribe screen.
+  // We fire the API call without awaiting it so the parent sees the Sage right away —
+  // the generating page polls /api/plan-status/[id] and handles completion itself.
+  function handleBuildPlan() {
     setSubmitting(true);
     setSubmitError(null);
 
-    try {
-      const res = await fetch("/api/generate-full-plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          paymentIntentId: id,
-          feedback: globalFeedback.trim() || undefined,
-        }),
-      });
+    // Kick off generation in the background — don't await
+    fetch("/api/generate-full-plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentIntentId: id,
+        feedback: globalFeedback.trim() || undefined,
+      }),
+    }).catch(() => {
+      // Errors will surface via the status poller on the generating page
+    });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to start plan generation");
-      }
-
-      router.push(`/generating/${id}?phase=full`);
-    } catch (err: unknown) {
-      setSubmitError(err instanceof Error ? err.message : "Something went wrong");
-      setSubmitting(false);
-    }
+    // Redirect immediately so the parent sees the Sage wait screen right away
+    router.push(`/generating/${id}?phase=full`);
   }
 
   // ── Loading state ──────────────────────────────────────────────────────────
@@ -326,7 +322,7 @@ export default function OutlinePage() {
         )}
 
         <p className="text-center text-xs text-[#8a8580] pb-4">
-          The full plan includes printable worksheets and teacher guides. Takes about 60-90 seconds.
+          Includes printable teacher guide and student packet. Usually 60-90 seconds, up to 2 minutes for detailed plans.
         </p>
       </div>
 
