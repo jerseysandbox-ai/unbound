@@ -262,14 +262,14 @@ Write 4-6 rich bullet points. Each bullet is 2-4 sentences. This is the parent's
 [TEACHER]
 Write exactly 3 discussion questions. Each question should require genuine reasoning - not a yes/no or one-word answer. For each question, write a full model answer of 3-5 sentences. The answer should give the parent real intellectual ammunition - the kind of depth that makes a child go "oh wow, I never thought of that." These are conversation starters, not quiz questions.
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance. Bold the Q line, regular weight for the answer.]
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Second thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance.]
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Third thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance.]
 [/TEACHER]
 
 ### Try It
@@ -315,14 +315,14 @@ Write 4-6 rich bullet points. Each bullet is 2-4 sentences. This is the parent's
 [TEACHER]
 Write exactly 3 discussion questions. Each question should require genuine reasoning - not a yes/no or one-word answer. For each question, write a full model answer of 3-5 sentences. The answer should give the parent real intellectual ammunition - the kind of depth that makes a child go "oh wow, I never thought of that." These are conversation starters, not quiz questions.
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance. Bold the Q line, regular weight for the answer.]
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Second thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance.]
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Third thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance.]
 [/TEACHER]
 
 ### Try It
@@ -368,14 +368,14 @@ Write 4-6 rich bullet points. Each bullet is 2-4 sentences. This is the parent's
 [TEACHER]
 Write exactly 3 discussion questions. Each question should require genuine reasoning - not a yes/no or one-word answer. For each question, write a full model answer of 3-5 sentences. The answer should give the parent real intellectual ammunition - the kind of depth that makes a child go "oh wow, I never thought of that." These are conversation starters, not quiz questions.
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance. Bold the Q line, regular weight for the answer.]
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Second thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance.]
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Third thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance.]
 [/TEACHER]
 
 ### Try It
@@ -421,14 +421,14 @@ Write 4-6 rich bullet points. Each bullet is 2-4 sentences. This is the parent's
 [TEACHER]
 Write exactly 3 discussion questions. Each question should require genuine reasoning - not a yes/no or one-word answer. For each question, write a full model answer of 3-5 sentences. The answer should give the parent real intellectual ammunition - the kind of depth that makes a child go "oh wow, I never thought of that." These are conversation starters, not quiz questions.
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance. Bold the Q line, regular weight for the answer.]
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Second thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance.]
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Third thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance.]
 [/TEACHER]
 
 ### Try It
@@ -474,14 +474,14 @@ Write 4-6 rich bullet points. Each bullet is 2-4 sentences. This is the parent's
 [TEACHER]
 Write exactly 3 discussion questions. Each question should require genuine reasoning - not a yes/no or one-word answer. For each question, write a full model answer of 3-5 sentences. The answer should give the parent real intellectual ammunition - the kind of depth that makes a child go "oh wow, I never thought of that." These are conversation starters, not quiz questions.
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance. Bold the Q line, regular weight for the answer.]
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Second thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance.]
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Third thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance.]
 [/TEACHER]
 
 ### Try It
@@ -527,14 +527,14 @@ Write 4-6 rich bullet points. Each bullet is 2-4 sentences. This is the parent's
 [TEACHER]
 Write exactly 3 discussion questions. Each question should require genuine reasoning - not a yes/no or one-word answer. For each question, write a full model answer of 3-5 sentences. The answer should give the parent real intellectual ammunition - the kind of depth that makes a child go "oh wow, I never thought of that." These are conversation starters, not quiz questions.
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance. Bold the Q line, regular weight for the answer.]
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Second thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance.]
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Third thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance.]
 [/TEACHER]
 
 ### Try It
@@ -580,14 +580,14 @@ Write 4-6 rich bullet points. Each bullet is 2-4 sentences. This is the parent's
 [TEACHER]
 Write exactly 3 discussion questions. Each question should require genuine reasoning - not a yes/no or one-word answer. For each question, write a full model answer of 3-5 sentences. The answer should give the parent real intellectual ammunition - the kind of depth that makes a child go "oh wow, I never thought of that." These are conversation starters, not quiz questions.
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance. Bold the Q line, regular weight for the answer.]
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Second thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance.]
 
-Q: [Question]
-A: [Full model answer - 3-5 sentences of real substance]
+**Q:** [Third thought-provoking question]
+A: [Full model answer - 3-5 sentences of real substance.]
 [/TEACHER]
 
 ### Try It

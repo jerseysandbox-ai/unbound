@@ -403,6 +403,30 @@ function renderMarkdownLines(
       continue;
     }
 
+    // Q: line — bold question in teacher sections
+    if (/^\*?\*?Q:\*?\*?\s/.test(line) || line.startsWith("Q:")) {
+      const questionText = line.replace(/^\*{0,2}Q:\*{0,2}\s*/, "");
+      elements.push(
+        <Text key={i} style={{ ...shared.body, fontFamily: "Helvetica-Bold", marginTop: 6 }}>
+          Q: {questionText}
+        </Text>
+      );
+      i++;
+      continue;
+    }
+
+    // A: line — regular weight answer
+    if (line.startsWith("A:")) {
+      const answerText = line.replace(/^A:\s*/, "");
+      elements.push(
+        <Text key={i} style={{ ...shared.body, marginBottom: 6, color: "#444444" }}>
+          {renderInline(answerText)}
+        </Text>
+      );
+      i++;
+      continue;
+    }
+
     // Plain paragraph — render with inline italic support for *"quoted suggestions"*
     elements.push(
       <Text key={i} style={shared.body}>
