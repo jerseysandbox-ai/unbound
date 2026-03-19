@@ -33,12 +33,13 @@ const MODEL = "claude-sonnet-4-5";
 const CLEAN_OUTPUT_RULES = `
 FORMATTING RULES (mandatory):
 - Never use em dashes (—). Use a regular hyphen-dash or rewrite the sentence.
-- Never use raw asterisks for bold or italic. Write in plain prose.
 - Never use emoji bullets (no ✅ 🔹 ➤ etc.). Use plain text lists.
 - Never leave a trailing colon on a header that has no following content.
 - Never use double spaces.
 - Markdown headings (## ###) and plain list dashes (-) are fine.
 - ALWAYS use the child's actual name (from the Nickname field in the profile) throughout your output. Never write [Student], [child], [Name], or any bracketed placeholder. If no nickname is provided, use "your learner."
+- Any suggested words for the parent to say (example phrases, conversation starters, scripts) must ALWAYS be wrapped in both quotation marks AND italics. Use markdown italic syntax: *"Try saying something like this to your child."* Every quoted suggestion, every example phrase, every line the parent might speak out loud - italicized, always.
+- Never use language that could feel alienating to families of any religious, cultural, or political background. Stay neutral and universally welcoming.
 `.trim();
 
 // ─── Type Definitions ───────────────────────────────────────────────────────

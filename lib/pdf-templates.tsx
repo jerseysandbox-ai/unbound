@@ -286,6 +286,39 @@ const shared = StyleSheet.create({
 // Handles: ## headings, - bullets, plain paragraphs.
 // Does NOT try to handle all markdown — just what Unbound agents produce.
 
+/**
+ * Splits a line into plain and italic segments so react-pdf can render
+ * inline italics. Handles *italic* and **bold** markdown syntax.
+ * Quoted parent suggestions like *"Say this to your child"* render in italics.
+ */
+function renderInline(text: string): React.ReactNode {
+  // Split on *...* or **...** markers
+  const parts = text.split(/(\*\*?[^*]+\*\*?)/g);
+  if (parts.length === 1) return text; // no formatting — return plain string
+
+  return (
+    <>
+      {parts.map((part, idx) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+          return (
+            <Text key={idx} style={{ fontFamily: "Helvetica-Bold" }}>
+              {part.slice(2, -2)}
+            </Text>
+          );
+        }
+        if (part.startsWith("*") && part.endsWith("*")) {
+          return (
+            <Text key={idx} style={{ fontFamily: "Helvetica-Oblique" }}>
+              {part.slice(1, -1)}
+            </Text>
+          );
+        }
+        return <Text key={idx}>{part}</Text>;
+      })}
+    </>
+  );
+}
+
 function renderMarkdownLines(
   text: string,
   isTeacher: boolean
@@ -330,7 +363,7 @@ function renderMarkdownLines(
         <View key={i} style={shared.bullet}>
           <Text style={shared.bulletDot}>•</Text>
           <Text style={shared.bulletText}>
-            {line.replace(/^[-*]\s+/, "")}
+            {renderInline(line.replace(/^[-*]\s+/, ""))}
           </Text>
         </View>
       );
@@ -344,7 +377,7 @@ function renderMarkdownLines(
         <View key={i} style={shared.bullet}>
           <Text style={shared.bulletDot}>{line.match(/^\d+/)?.[0]}.</Text>
           <Text style={shared.bulletText}>
-            {line.replace(/^\d+\.\s+/, "")}
+            {renderInline(line.replace(/^\d+\.\s+/, ""))}
           </Text>
         </View>
       );
@@ -370,10 +403,10 @@ function renderMarkdownLines(
       continue;
     }
 
-    // Plain paragraph
+    // Plain paragraph — render with inline italic support for *"quoted suggestions"*
     elements.push(
       <Text key={i} style={shared.body}>
-        {line}
+        {renderInline(line)}
       </Text>
     );
     i++;
