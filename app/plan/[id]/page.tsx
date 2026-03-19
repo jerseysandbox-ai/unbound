@@ -23,6 +23,29 @@ import type { GeneratedPlan, ScholarQuote } from "@/lib/agents";
  * Returns plan text with [STUDENT]...[/STUDENT] blocks removed
  * and [TEACHER]...[/TEACHER] tags stripped (keeping the inner content).
  */
+/** Clean SVG line icons per subject — no emojis */
+function SubjectIcon({ subject }: { subject: string }) {
+  const s = subject.toLowerCase();
+  const props = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round" as const, strokeLinejoin: "round" as const, className: "w-5 h-5" };
+
+  if (s.includes("math"))
+    return <svg {...props}><path d="M12 4v16M4 12h16M6 6l12 12M18 6L6 18"/></svg>;
+  if (s.includes("science"))
+    return <svg {...props}><path d="M9 3h6v5l3 8H6l3-8V3z"/><path d="M6 16h12"/><circle cx="9" cy="20" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="20" r="1" fill="currentColor" stroke="none"/></svg>;
+  if (s.includes("language") || s.includes("literacy") || s.includes("arts") && s.includes("lang"))
+    return <svg {...props}><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>;
+  if (s.includes("social") || s.includes("history") || s.includes("geography"))
+    return <svg {...props}><circle cx="12" cy="12" r="9"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>;
+  if (s.includes("sel") || s.includes("life") || s.includes("social-emo") || s.includes("executive"))
+    return <svg {...props}><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>;
+  if (s.includes("art") || s.includes("creative") || s.includes("studio"))
+    return <svg {...props}><circle cx="12" cy="12" r="3"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.85 0 3-.5 3-2 0-.56-.08-1.08-.22-1.57-.3-1.1.53-2.43 1.72-2.43H18c2.21 0 4-1.79 4-4 0-4.42-4.03-8-10-8z"/></svg>;
+  if (s.includes("entrepreneur") || s.includes("spark") || s.includes("business"))
+    return <svg {...props}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>;
+  // fallback — open book
+  return <svg {...props}><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2V3z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7V3z"/></svg>;
+}
+
 function extractTeacherContent(plan: string): string {
   return plan
     // Remove [STUDENT]...[/STUDENT] blocks entirely
@@ -267,7 +290,7 @@ export default function PlanPage() {
             </ReactMarkdown>
           </article>
 
-          {/* Subjects covered - teacher tab only, no agent/AI framing */}
+          {/* Subjects covered - teacher tab only */}
           {activeTab === "teacher" && plan.agentOutputs.some(a => !a.error) && (
             <div className="mt-8 no-print">
               <h2 className="text-sm font-semibold text-[#8a8580] uppercase tracking-wide mb-4">
@@ -277,8 +300,11 @@ export default function PlanPage() {
                 {plan.agentOutputs.filter(a => !a.error).map((agent) => (
                   <div
                     key={agent.subject}
-                    className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm bg-[#e8f4f3] text-[#3d6e69]"
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm bg-[#e8f4f3] text-[#3d6e69]"
                   >
+                    <span className="shrink-0 w-5 h-5 text-[#5b8f8a]">
+                      <SubjectIcon subject={agent.subject} />
+                    </span>
                     <span className="font-medium">{agent.subject}</span>
                   </div>
                 ))}
