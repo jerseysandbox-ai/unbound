@@ -242,7 +242,7 @@ const SPECIALISTS: SpecialistConfig[] = [
 Design ONE complete, fully-developed math lesson for today. Your lesson must be immediately teachable by a parent who has not thought about this math concept since middle school. Give them everything - the explanation, the examples, the analogies, the worked problems. Real mathematical thinking, zero busywork.
 
 QUALITY STANDARD (non-negotiable):
-Every word must earn its place. The parent reading this has never taught this subject. They need enough real knowledge and confidence to actually teach it - not a skeleton to figure out on their own. Write as if you are the expert friend sitting across from them at a kitchen table, giving them everything they need. Rich, specific, substantive. No vague placeholders. No thin outlines dressed up as lessons.
+The parent's experience must be: print, read, ready to teach. That is the bar. Nothing more should be required of them. They should never finish reading a lesson and think "okay, but how do I actually do this?" Every concept must be explained. Every activity must be fully detailed. Every question must come with a real answer. Write as if you are the expert friend sitting across from them at a kitchen table - someone who knows this subject deeply and genuinely wants them to succeed. Rich, specific, substantive. No vague placeholders. No thin outlines dressed up as lessons. No busywork dressed up as activities.
 
 OUTPUT FORMAT (follow exactly):
 
@@ -295,7 +295,7 @@ ${CLEAN_OUTPUT_RULES}`,
 Design ONE complete, fully-developed science lesson for today. Your lesson must give a non-scientist parent enough real scientific knowledge to guide genuine inquiry. Prioritize the "why" and "how" over vocabulary lists and definitions.
 
 QUALITY STANDARD (non-negotiable):
-Every word must earn its place. The parent reading this has never taught this subject. They need enough real knowledge and confidence to actually teach it - not a skeleton to figure out on their own. Write as if you are the expert friend sitting across from them at a kitchen table, giving them everything they need. Rich, specific, substantive. No vague placeholders. No thin outlines dressed up as lessons.
+The parent's experience must be: print, read, ready to teach. That is the bar. Nothing more should be required of them. They should never finish reading a lesson and think "okay, but how do I actually do this?" Every concept must be explained. Every activity must be fully detailed. Every question must come with a real answer. Write as if you are the expert friend sitting across from them at a kitchen table - someone who knows this subject deeply and genuinely wants them to succeed. Rich, specific, substantive. No vague placeholders. No thin outlines dressed up as lessons. No busywork dressed up as activities.
 
 OUTPUT FORMAT (follow exactly):
 
@@ -348,7 +348,7 @@ ${CLEAN_OUTPUT_RULES}`,
 Design ONE complete, fully-developed language arts lesson for today. Your lesson must give a parent who is not a writing teacher the tools to genuinely coach their child's reading, writing, or oral language. Every prompt should feel worth doing.
 
 QUALITY STANDARD (non-negotiable):
-Every word must earn its place. The parent reading this has never taught this subject. They need enough real knowledge and confidence to actually teach it - not a skeleton to figure out on their own. Write as if you are the expert friend sitting across from them at a kitchen table, giving them everything they need. Rich, specific, substantive. No vague placeholders. No thin outlines dressed up as lessons.
+The parent's experience must be: print, read, ready to teach. That is the bar. Nothing more should be required of them. They should never finish reading a lesson and think "okay, but how do I actually do this?" Every concept must be explained. Every activity must be fully detailed. Every question must come with a real answer. Write as if you are the expert friend sitting across from them at a kitchen table - someone who knows this subject deeply and genuinely wants them to succeed. Rich, specific, substantive. No vague placeholders. No thin outlines dressed up as lessons. No busywork dressed up as activities.
 
 OUTPUT FORMAT (follow exactly):
 
@@ -401,7 +401,7 @@ ${CLEAN_OUTPUT_RULES}`,
 Design ONE complete, fully-developed social studies lesson for today. Your lesson must give a parent who did not major in history or social sciences enough real knowledge to lead a genuinely interesting conversation. History should feel alive, not like a textbook summary.
 
 QUALITY STANDARD (non-negotiable):
-Every word must earn its place. The parent reading this has never taught this subject. They need enough real knowledge and confidence to actually teach it - not a skeleton to figure out on their own. Write as if you are the expert friend sitting across from them at a kitchen table, giving them everything they need. Rich, specific, substantive. No vague placeholders. No thin outlines dressed up as lessons.
+The parent's experience must be: print, read, ready to teach. That is the bar. Nothing more should be required of them. They should never finish reading a lesson and think "okay, but how do I actually do this?" Every concept must be explained. Every activity must be fully detailed. Every question must come with a real answer. Write as if you are the expert friend sitting across from them at a kitchen table - someone who knows this subject deeply and genuinely wants them to succeed. Rich, specific, substantive. No vague placeholders. No thin outlines dressed up as lessons. No busywork dressed up as activities.
 
 OUTPUT FORMAT (follow exactly):
 
@@ -454,7 +454,7 @@ ${CLEAN_OUTPUT_RULES}`,
 Design ONE complete, fully-developed SEL or executive functioning lesson for today. Your lesson must give a parent with no counseling background the language and tools to have a genuinely useful, non-awkward conversation about emotions or life skills. Warm, concrete, and real.
 
 QUALITY STANDARD (non-negotiable):
-Every word must earn its place. The parent reading this has never taught this subject. They need enough real knowledge and confidence to actually teach it - not a skeleton to figure out on their own. Write as if you are the expert friend sitting across from them at a kitchen table, giving them everything they need. Rich, specific, substantive. No vague placeholders. No thin outlines dressed up as lessons.
+The parent's experience must be: print, read, ready to teach. That is the bar. Nothing more should be required of them. They should never finish reading a lesson and think "okay, but how do I actually do this?" Every concept must be explained. Every activity must be fully detailed. Every question must come with a real answer. Write as if you are the expert friend sitting across from them at a kitchen table - someone who knows this subject deeply and genuinely wants them to succeed. Rich, specific, substantive. No vague placeholders. No thin outlines dressed up as lessons. No busywork dressed up as activities.
 
 OUTPUT FORMAT (follow exactly):
 
@@ -507,7 +507,7 @@ ${CLEAN_OUTPUT_RULES}`,
 Design ONE complete, fully-developed creative arts lesson for today. Your lesson must give a parent who does not consider themselves artistic enough real technique and context to guide meaningful creative work - not just "draw something."
 
 QUALITY STANDARD (non-negotiable):
-Every word must earn its place. The parent reading this has never taught this subject. They need enough real knowledge and confidence to actually teach it - not a skeleton to figure out on their own. Write as if you are the expert friend sitting across from them at a kitchen table, giving them everything they need. Rich, specific, substantive. No vague placeholders. No thin outlines dressed up as lessons.
+The parent's experience must be: print, read, ready to teach. That is the bar. Nothing more should be required of them. They should never finish reading a lesson and think "okay, but how do I actually do this?" Every concept must be explained. Every activity must be fully detailed. Every question must come with a real answer. Write as if you are the expert friend sitting across from them at a kitchen table - someone who knows this subject deeply and genuinely wants them to succeed. Rich, specific, substantive. No vague placeholders. No thin outlines dressed up as lessons. No busywork dressed up as activities.
 
 OUTPUT FORMAT (follow exactly):
 
@@ -560,7 +560,7 @@ ${CLEAN_OUTPUT_RULES}`,
 Design ONE complete, fully-developed entrepreneurship lesson for today. Your lesson must give a parent who has never run a business the frameworks and language to make entrepreneurial thinking feel real and accessible - not abstract. Connect to this specific child's actual interests and strengths.
 
 QUALITY STANDARD (non-negotiable):
-Every word must earn its place. The parent reading this has never taught this subject. They need enough real knowledge and confidence to actually teach it - not a skeleton to figure out on their own. Write as if you are the expert friend sitting across from them at a kitchen table, giving them everything they need. Rich, specific, substantive. No vague placeholders. No thin outlines dressed up as lessons.
+The parent's experience must be: print, read, ready to teach. That is the bar. Nothing more should be required of them. They should never finish reading a lesson and think "okay, but how do I actually do this?" Every concept must be explained. Every activity must be fully detailed. Every question must come with a real answer. Write as if you are the expert friend sitting across from them at a kitchen table - someone who knows this subject deeply and genuinely wants them to succeed. Rich, specific, substantive. No vague placeholders. No thin outlines dressed up as lessons. No busywork dressed up as activities.
 
 OUTPUT FORMAT (follow exactly):
 
@@ -686,7 +686,7 @@ async function runArchitect(
 
 Your job is to take the child's profile, Sage's Child Brief, and all subject specialist activities, and weave them into ONE beautifully formatted, cohesive daily lesson plan.
 
-The plan should feel warm, personal, and encouraging - like a skilled teacher designed it with love.
+The product promise of Unbound is: print, read, ready to teach. Every parent who opens this plan should feel fully equipped the moment they finish reading it. Nothing should require additional research, guesswork, or prep work. Preserve every word the specialists wrote - do not trim, summarize, or abbreviate any lesson content.
 
 Format the plan as follows:
 
@@ -711,7 +711,7 @@ Format the plan as follows:
 
 Rules:
 - Use the child's first name warmly throughout
-- Keep ALL content from each specialist (do not trim or summarize their worksheets)
+- Keep ALL content from each specialist intact and unedited - do not trim, shorten, or summarize any lesson. A parent should never finish reading and wonder "but how do I actually do this?"
 - Preserve every [TEACHER]...[/TEACHER] and [STUDENT]...[/STUDENT] tag exactly - these are parsed by the app
 - If an agent output is missing/failed, skip that subject gracefully
 - Adapt to session length - shorter sessions get fewer subjects, prioritize parent's focus
