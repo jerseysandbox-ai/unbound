@@ -400,7 +400,7 @@ export default function ProfilePage() {
                     What materials do you have at home?
                   </label>
                   <p className="text-xs text-[#8a8580] mb-2">
-                    Optional — helps us design lessons around what you actually have
+                    Optional - helps us design lessons around what you actually have
                   </p>
                   <div className="grid grid-cols-1 gap-2">
                     {[
@@ -437,13 +437,13 @@ export default function ProfilePage() {
                 {/* State standards - optional */}
                 <Field
                   label="State learning standards"
-                  hint="Optional — paste any standards you want today's plan to align with"
+                  hint="Optional - paste any standards you want today's plan to align with"
                 >
                   <textarea
                     name="stateStandards"
                     value={form.stateStandards}
                     onChange={handleChange}
-                    placeholder="e.g. CCSS.MATH.CONTENT.4.OA.A.1 — Interpret a multiplication equation as a comparison"
+                    placeholder="e.g. CCSS.MATH.CONTENT.4.OA.A.1: Interpret a multiplication equation as a comparison"
                     rows={3}
                     className={textareaClass}
                   />

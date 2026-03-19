@@ -167,7 +167,7 @@ export default function HomePage() {
         </h1>
         <p className="text-lg text-[#8a8580] mb-10 leading-relaxed">
           Tell us about your learner. Get a full personalized daily plan crafted
-          by a team of AI specialists — built around their interests, their pace,
+          by a team of AI specialists, built around their interests, their pace,
           and your goals for today.
         </p>
 
@@ -175,7 +175,7 @@ export default function HomePage() {
           href={userEmail ? "/profile" : "/signup"}
           className="inline-block bg-[#5b8f8a] hover:bg-[#3d6e69] text-white font-semibold text-lg px-8 py-4 rounded-2xl transition-colors shadow-sm"
         >
-          {userEmail ? "Create Today's Plan" : "Get Started — First Plan Free"}
+          {userEmail ? "Create Today's Plan" : "Get Started - First Plan Free"}
         </Link>
         <p className="mt-4 text-sm text-[#8a8580]">
           First plan free · Plan 2+ just $9 each · No subscription
@@ -192,7 +192,7 @@ export default function HomePage() {
             {
               step: "1",
               title: "Create your free account",
-              desc: "Sign up in seconds. No credit card needed — your first plan is on us.",
+              desc: "Sign up in seconds. No credit card needed. Your first plan is on us.",
             },
             {
               step: "2",
@@ -305,7 +305,7 @@ export default function HomePage() {
           Ready to try it?
         </h2>
         <p className="text-[#8a8580] mb-8">
-          No subscription. Your first plan is free — just create an account and go.
+          No subscription. Your first plan is free. Just create an account and go.
         </p>
         <Link
           href={userEmail ? "/profile" : "/signup"}

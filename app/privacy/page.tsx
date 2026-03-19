@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Privacy Policy — Unbound",
+  title: "Privacy Policy | Unbound",
   description: "How Unbound handles your child's information.",
 };
 
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
             <p>We also collect:</p>
             <ul>
               <li>
-                A payment token through Stripe (we never see your card number — Stripe handles all
+                A payment token through Stripe (we never see your card number. Stripe handles all
                 payment processing)
               </li>
               <li>A Cloudflare Turnstile verification token (bot protection)</li>
@@ -86,7 +86,7 @@ export default function PrivacyPage() {
 
           <Section title="How long we keep it">
             <p>
-              Your session data — including your child&apos;s profile and the generated plan — is stored
+              Your session data, including your child&apos;s profile and the generated plan, is stored
               temporarily and automatically deleted after 24 hours. We do not maintain a database of
               users or plans.
             </p>
@@ -95,26 +95,26 @@ export default function PrivacyPage() {
           <Section title="Third parties we work with">
             <ul>
               <li>
-                <strong>Anthropic</strong> — provides the AI that generates lesson plans. Your child&apos;s
+                <strong>Anthropic</strong>: provides the AI that generates lesson plans. Your child&apos;s
                 profile is sent to Anthropic&apos;s API during plan generation.{" "}
                 <a href="https://anthropic.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[#5b8f8a] hover:underline">
                   anthropic.com/privacy
                 </a>
               </li>
               <li>
-                <strong>Stripe</strong> — processes payments securely. We never see your card details.{" "}
+                <strong>Stripe</strong>: processes payments securely. We never see your card details.{" "}
                 <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[#5b8f8a] hover:underline">
                   stripe.com/privacy
                 </a>
               </li>
               <li>
-                <strong>Vercel</strong> — hosts the application and stores temporary session data.{" "}
+                <strong>Vercel</strong>: hosts the application and stores temporary session data.{" "}
                 <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-[#5b8f8a] hover:underline">
                   vercel.com/legal/privacy-policy
                 </a>
               </li>
               <li>
-                <strong>Cloudflare</strong> — provides bot protection via Turnstile.{" "}
+                <strong>Cloudflare</strong>: provides bot protection via Turnstile.{" "}
                 <a href="https://cloudflare.com/privacypolicy" target="_blank" rel="noopener noreferrer" className="text-[#5b8f8a] hover:underline">
                   cloudflare.com/privacypolicy
                 </a>
@@ -141,8 +141,8 @@ export default function PrivacyPage() {
           <Section title="Your rights">
             <p>
               Because we don&apos;t maintain user accounts or long-term records, most data is automatically
-              deleted within 24 hours. If you have a specific request — including deletion of data
-              before the 24-hour window — contact us at{" "}
+              deleted within 24 hours. If you have a specific request, including deletion of data
+              before the 24-hour window, contact us at{" "}
               <a href="mailto:privacy@unboundlearn.co" className="text-[#5b8f8a] hover:underline">
                 privacy@unboundlearn.co
               </a>{" "}

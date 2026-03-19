@@ -65,7 +65,7 @@ export default function BookCompanionPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Book Companion</h1>
           <p className="text-gray-500 text-sm leading-relaxed">
             Enter a book you are reading together and get chapter summaries,
-            discussion questions, and vocabulary — tailored for your read-aloud or
+            discussion questions, and vocabulary tailored for your read-aloud or
             independent reading session.
           </p>
         </div>
@@ -89,7 +89,7 @@ export default function BookCompanionPage() {
           {/* Author (optional) */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Author <span className="text-gray-400 font-normal">(optional — we'll identify it if blank)</span>
+              Author <span className="text-gray-400 font-normal">(optional - we'll identify it if blank)</span>
             </label>
             <input
               type="text"

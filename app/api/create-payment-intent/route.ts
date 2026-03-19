@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: PLAN_PRICE_CENTS,
       currency: "usd",
-      description: "Unbound — Personalized Daily Lesson Plan",
+      description: "Unbound: Personalized Daily Lesson Plan",
       metadata: {
         product: "unbound_plan_v0",
       },
