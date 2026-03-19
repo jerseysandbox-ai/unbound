@@ -161,13 +161,15 @@ export default function HomePage() {
         <div className="inline-block bg-[#e8f4f3] text-[#3d6e69] text-sm font-medium px-3 py-1 rounded-full mb-4 ml-2">
           Personalized homeschool plans, instantly
         </div>
-        <h1 className="font-display text-4xl sm:text-5xl font-bold text-[#2d2d2d] leading-tight mb-6">
-          Every lesson plan,{" "}
-          <span className="text-[#1a5c5a]">made for your child.</span>
+        <h1 className="font-display text-4xl sm:text-5xl font-bold leading-tight mb-6">
+          {/* Line 1 — dark */}
+          <span className="block text-[#2d2d2d]">A lesson plan made</span>
+          {/* Line 2 — teal, includes "just" */}
+          <span className="block text-[#1a5c5a]">just for your child.</span>
         </h1>
         <p className="text-lg text-[#8a8580] mb-10 leading-relaxed">
-          Tell us about your learner and get a full personalized daily plan built
-          around their interests, their pace, and your goals for today.
+          Tell us about your learner and get a full personalized daily plan
+          built around their interests, their pace, and your goals for today.
         </p>
 
         <Link
