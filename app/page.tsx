@@ -71,6 +71,23 @@ const IconPacing = () => (
   </svg>
 );
 
+// Book icon for Book Companion card
+const IconBook = () => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+    <path d="M4 3h9a2 2 0 012 2v11a2 2 0 01-2 2H4a1 1 0 01-1-1V4a1 1 0 011-1z" />
+    <path d="M15 14h1a1 1 0 001-1V5a1 1 0 00-1-1h-1" />
+    <path d="M7 7h5M7 10h5M7 13h3" />
+  </svg>
+);
+
+// Sparkle icon for Book Recommendations card
+const IconSparkle = () => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+    <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.93 4.93l1.41 1.41M13.66 13.66l1.41 1.41M4.93 15.07l1.41-1.41M13.66 6.34l1.41-1.41" />
+    <circle cx="10" cy="10" r="3" />
+  </svg>
+);
+
 const PLAN_SUBJECTS = [
   { icon: <IconMath />, label: "Math" },
   { icon: <IconScience />, label: "Science" },
@@ -227,6 +244,57 @@ export default function HomePage() {
                 <span className="text-[#2d2d2d] font-medium text-sm">{label}</span>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Reading Tools section */}
+      <section className="py-12 px-6 mt-2">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold text-center text-[#2d2d2d] mb-2">
+            Reading Tools
+          </h2>
+          <p className="text-center text-[#8a8580] text-sm mb-8">
+            Support independent reading and discover what to read next.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-5">
+            {/* Book Companion card */}
+            <Link
+              href="/book-companion"
+              className="group flex flex-col gap-3 bg-white rounded-2xl px-5 py-5 shadow-sm border border-[#ddf0ee] hover:shadow-md hover:border-[#1a5c5a] transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-[#1a5c5a] w-6 h-6 shrink-0">
+                  <IconBook />
+                </span>
+                <span className="font-semibold text-[#2d2d2d] text-base">Book Companion</span>
+              </div>
+              <p className="text-sm text-[#8a8580] leading-relaxed">
+                Chapter summaries, discussion questions with answers, and vocabulary for any book you are reading together.
+              </p>
+              <span className="text-xs font-semibold text-[#1a5c5a] group-hover:underline mt-auto">
+                Generate a companion →
+              </span>
+            </Link>
+
+            {/* Book Recommendations card */}
+            <Link
+              href="/book-recommendations"
+              className="group flex flex-col gap-3 bg-white rounded-2xl px-5 py-5 shadow-sm border border-[#ddf0ee] hover:shadow-md hover:border-[#1a5c5a] transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-[#1a5c5a] w-6 h-6 shrink-0">
+                  <IconSparkle />
+                </span>
+                <span className="font-semibold text-[#2d2d2d] text-base">Book Recommendations</span>
+              </div>
+              <p className="text-sm text-[#8a8580] leading-relaxed">
+                6 personalized picks based on your reader&apos;s level, interests, and what you are studying.
+              </p>
+              <span className="text-xs font-semibold text-[#1a5c5a] group-hover:underline mt-auto">
+                Get recommendations →
+              </span>
+            </Link>
           </div>
         </div>
       </section>
