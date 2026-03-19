@@ -620,3 +620,171 @@ export async function generateStudentPdf(
   const arrayBuffer = await blob.arrayBuffer();
   return new Uint8Array(arrayBuffer);
 }
+
+// ─── Book Companion PDF types ──────────────────────────────────────────────────
+
+export interface VocabEntry {
+  word: string;
+  definition: string;
+  bookSentence: string;
+  exampleSentence: string;
+  synonyms: string;
+}
+
+export interface DiscussionQA {
+  question: string;
+  answer: string;
+}
+
+export interface BookCompanionData {
+  title: string;
+  author: string;
+  chapter: string;
+  summary: string;
+  discussion: DiscussionQA[];
+  vocabulary: VocabEntry[];
+  readAloudTip: string;
+  crossSubject: string;
+}
+
+// ─── Book Companion: Teacher Guide PDF ────────────────────────────────────────
+
+const bookStyles = StyleSheet.create({
+  page:      { fontFamily: "Helvetica", fontSize: 10, padding: 50, color: "#1a1a1a", backgroundColor: "#ffffff" },
+  titleText: { fontSize: 18, color: "#1a5c5a", marginBottom: 3, fontFamily: "Helvetica-Bold" },
+  sub:       { fontSize: 9,  color: "#666666", marginBottom: 18 },
+  h2:        { fontSize: 12, color: "#1a5c5a", marginTop: 14, marginBottom: 5, fontFamily: "Helvetica-Bold" },
+  body:      { fontSize: 9.5, lineHeight: 1.5, marginBottom: 3 },
+  label:     { fontSize: 8.5, color: "#555555", fontFamily: "Helvetica-Bold", marginBottom: 1 },
+  divider:   { borderBottom: "0.5 solid #dddddd", marginVertical: 8 },
+  vocabCard: { backgroundColor: "#f5f5f5", borderRadius: 4, padding: 8, marginBottom: 6 },
+  vocabWord: { fontSize: 11, color: "#1a5c5a", fontFamily: "Helvetica-Bold", marginBottom: 3 },
+  tip:       { backgroundColor: "#fef9ed", padding: 9, borderRadius: 4 },
+  cross:     { backgroundColor: "#e8f4f3", padding: 9, borderRadius: 4 },
+  qBox:      { marginBottom: 8 },
+  qLabel:    { fontSize: 9.5, color: "#1a5c5a", fontFamily: "Helvetica-Bold" },
+  ansBox:    { backgroundColor: "#f5f5f5", padding: 8, borderRadius: 4, marginTop: 3 },
+  ansLabel:  { fontSize: 8, color: "#888888", fontFamily: "Helvetica-Bold", marginBottom: 2 },
+  blankLine: { borderBottom: "0.5 solid #cccccc", marginBottom: 14 },
+  journalBox:{ border: "0.5 solid #cccccc", borderRadius: 4, height: 80, marginTop: 6 },
+});
+
+const BookTeacherGuide = ({ data }: { data: BookCompanionData }) => {
+  const showCross = data.crossSubject && !data.crossSubject.toLowerCase().startsWith("none");
+  return (
+    <Document>
+      <Page size="LETTER" style={bookStyles.page}>
+        <Text style={bookStyles.titleText}>{data.title}</Text>
+        <Text style={bookStyles.sub}>
+          {data.author ? `${data.author} · ` : ""}{data.chapter} · Teacher Guide
+        </Text>
+
+        <Text style={bookStyles.h2}>Chapter Summary</Text>
+        <Text style={bookStyles.body}>{data.summary}</Text>
+
+        <View style={bookStyles.divider} />
+        <Text style={bookStyles.h2}>Discussion Questions</Text>
+        {data.discussion.map((qa, i) => (
+          <View key={i} style={bookStyles.qBox}>
+            <Text style={bookStyles.qLabel}>Q{i + 1}: {qa.question}</Text>
+            <View style={bookStyles.ansBox}>
+              <Text style={bookStyles.ansLabel}>Model Answer</Text>
+              <Text style={bookStyles.body}>{qa.answer}</Text>
+            </View>
+          </View>
+        ))}
+
+        <View style={bookStyles.divider} />
+        <Text style={bookStyles.h2}>Vocabulary</Text>
+        {data.vocabulary.map((v, i) => (
+          <View key={i} style={bookStyles.vocabCard}>
+            <Text style={bookStyles.vocabWord}>{v.word}</Text>
+            <Text style={bookStyles.label}>Definition</Text>
+            <Text style={bookStyles.body}>{v.definition}</Text>
+            <Text style={bookStyles.label}>From the book</Text>
+            <Text style={bookStyles.body}>{v.bookSentence}</Text>
+            <Text style={bookStyles.label}>Example sentence</Text>
+            <Text style={bookStyles.body}>{v.exampleSentence}</Text>
+            <Text style={bookStyles.label}>Synonyms</Text>
+            <Text style={bookStyles.body}>{v.synonyms}</Text>
+          </View>
+        ))}
+
+        {data.readAloudTip ? (
+          <>
+            <View style={bookStyles.divider} />
+            <Text style={bookStyles.h2}>Read-Aloud Tip</Text>
+            <View style={bookStyles.tip}>
+              <Text style={bookStyles.body}>{data.readAloudTip}</Text>
+            </View>
+          </>
+        ) : null}
+
+        {showCross ? (
+          <>
+            <View style={bookStyles.divider} />
+            <Text style={bookStyles.h2}>Cross-Subject Connection</Text>
+            <View style={bookStyles.cross}>
+              <Text style={bookStyles.body}>{data.crossSubject}</Text>
+            </View>
+          </>
+        ) : null}
+      </Page>
+    </Document>
+  );
+};
+
+const BookStudentPacket = ({ data }: { data: BookCompanionData }) => (
+  <Document>
+    <Page size="LETTER" style={bookStyles.page}>
+      <Text style={bookStyles.titleText}>{data.title}</Text>
+      <Text style={bookStyles.sub}>
+        {data.author ? `${data.author} · ` : ""}{data.chapter} · Student Packet
+      </Text>
+
+      <Text style={bookStyles.h2}>Discussion Questions</Text>
+      {data.discussion.map((qa, i) => (
+        <View key={i} style={bookStyles.qBox}>
+          <Text style={bookStyles.qLabel}>Q{i + 1}: {qa.question}</Text>
+          {[0, 1, 2, 3].map(j => (
+            <View key={j} style={bookStyles.blankLine} />
+          ))}
+        </View>
+      ))}
+
+      <View style={bookStyles.divider} />
+      <Text style={bookStyles.h2}>Vocabulary</Text>
+      {data.vocabulary.map((v, i) => (
+        <View key={i} style={bookStyles.vocabCard}>
+          <Text style={bookStyles.vocabWord}>{v.word}</Text>
+          <Text style={bookStyles.body}>{v.definition}</Text>
+        </View>
+      ))}
+
+      <View style={bookStyles.divider} />
+      <Text style={bookStyles.h2}>Reading Journal</Text>
+      <Text style={bookStyles.body}>
+        What was the most interesting or surprising moment in this chapter? Describe it and explain why it stood out to you.
+      </Text>
+      <View style={bookStyles.journalBox} />
+    </Page>
+  </Document>
+);
+
+// ─── Book Companion PDF export helpers ────────────────────────────────────────
+
+export async function generateBookTeacherPdf(data: BookCompanionData): Promise<Uint8Array> {
+  const doc = <BookTeacherGuide data={data} />;
+  const instance = pdf(doc);
+  const blob = await instance.toBlob();
+  const ab = await blob.arrayBuffer();
+  return new Uint8Array(ab);
+}
+
+export async function generateBookStudentPdf(data: BookCompanionData): Promise<Uint8Array> {
+  const doc = <BookStudentPacket data={data} />;
+  const instance = pdf(doc);
+  const blob = await instance.toBlob();
+  const ab = await blob.arrayBuffer();
+  return new Uint8Array(ab);
+}
