@@ -70,3 +70,36 @@ export async function GET() {
     return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
   }
 }
+
+/**
+ * PATCH /api/admin/users
+ * Body: { userId, is_unlimited, free_plan_used }
+ * Sets flags on a user. Admin only.
+ */
+export async function PATCH(request: Request) {
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user || !ADMIN_EMAILS.includes(user.email ?? "")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { userId, is_unlimited, free_plan_used } = body;
+
+    const admin = createAdminClient();
+    const updates: Record<string, unknown> = {};
+    if (typeof is_unlimited === "boolean") updates.is_unlimited = is_unlimited;
+    if (typeof free_plan_used === "boolean") updates.free_plan_used = free_plan_used;
+
+    const { error } = await admin
+      .from("unbound_users")
+      .update(updates)
+      .eq("id", userId);
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    return NextResponse.json({ error: String(err) }, { status: 500 });
+  }
+}
