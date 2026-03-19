@@ -143,13 +143,14 @@ export default function GeneratingPage() {
   const messages = phase === "full" ? FULL_MESSAGES : OUTLINE_MESSAGES;
   const estimatedTime =
     phase === "full"
-      ? "This takes about 60-90 seconds depending on your plan."
-      : "This takes about 15 seconds.";
+      ? "This usually takes 60-90 seconds. Longer plans may take up to 2 minutes."
+      : "This usually takes 15-30 seconds. Please don't close this tab.";
 
   const [progress, setProgress] = useState(0);
   const [messageIdx, setMessageIdx] = useState(0);
   const [apiMessage, setApiMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [elapsed, setElapsed] = useState(0); // seconds since generation started
   const generateCalled = useRef(false);
 
   // Rotate through status messages every 4 seconds
@@ -159,6 +160,12 @@ export default function GeneratingPage() {
     }, 4000);
     return () => clearInterval(timer);
   }, [messages.length]);
+
+  // Elapsed time counter — increments every second so parents can see progress is happening
+  useEffect(() => {
+    const timer = setInterval(() => setElapsed((s) => s + 1), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // When phase=outline, trigger outline generation on mount.
   // This way the checkout page can redirect immediately after payment without
@@ -288,8 +295,17 @@ export default function GeneratingPage() {
           />
         </div>
 
-        {/* Time estimate */}
-        <p className="text-xs text-[#b0aba6]">{estimatedTime}</p>
+        {/* Time estimate + live elapsed counter */}
+        <div className="text-xs text-[#b0aba6] space-y-1">
+          <p>{estimatedTime}</p>
+          <p className="tabular-nums">
+            {elapsed < 10
+              ? `${elapsed}s elapsed — still working, hang tight!`
+              : elapsed < 60
+              ? `${elapsed}s elapsed — almost there...`
+              : `${Math.floor(elapsed / 60)}m ${elapsed % 60}s elapsed — wrapping up the final touches...`}
+          </p>
+        </div>
       </div>
 
       <style>{`
