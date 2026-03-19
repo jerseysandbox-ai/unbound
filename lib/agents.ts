@@ -38,6 +38,7 @@ FORMATTING RULES (mandatory):
 - Never leave a trailing colon on a header that has no following content.
 - Never use double spaces.
 - Markdown headings (## ###) and plain list dashes (-) are fine.
+- ALWAYS use the child's actual name (from the Nickname field in the profile) throughout your output. Never write [Student], [child], [Name], or any bracketed placeholder. If no nickname is provided, use "your learner."
 `.trim();
 
 // ─── Type Definitions ───────────────────────────────────────────────────────
