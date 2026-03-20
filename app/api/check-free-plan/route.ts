@@ -17,6 +17,7 @@ import { NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
 import { createClient } from "@/lib/supabase/server";
 import { randomUUID } from "crypto";
+import { ADMIN_EMAILS } from "@/lib/config";
 
 // 24 hours in seconds
 const KV_TTL = 86400;
@@ -73,8 +74,9 @@ export async function POST(request: Request) {
       .eq("id", user.id)
       .single();
 
-    // Unlimited accounts bypass ALL claim checks — generate fresh session every time
-    if (!dbError && userData?.is_unlimited) {
+    // Admin emails and is_unlimited accounts always bypass ALL checks
+    const isAdmin = ADMIN_EMAILS.includes(user.email ?? "");
+    if (isAdmin || (!dbError && userData?.is_unlimited)) {
       const freeSessionId = `free_${randomUUID()}`;
       await kv.set(`status:${freeSessionId}`, { phase: "pending", progress: 0 }, { ex: KV_TTL });
       await kv.set(`free_user:${freeSessionId}`, user.id, { ex: KV_TTL });
