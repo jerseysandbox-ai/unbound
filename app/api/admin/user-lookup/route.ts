@@ -25,7 +25,8 @@ export async function POST(request: Request) {
     const { data: listData, error: listError } = await admin.auth.admin.listUsers({ perPage: 1000 });
     if (listError) return NextResponse.json({ error: listError.message }, { status: 500 });
 
-    const found = listData?.users?.find(
+    type AuthUser = { id: string; email?: string | null; email_confirmed_at?: string | null; created_at: string; last_sign_in_at?: string | null };
+    const found = (listData?.users as AuthUser[] | undefined)?.find(
       (u) => u.email?.toLowerCase() === email.toLowerCase()
     );
 
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         ok: true,
         action: "magic_link_generated",
-        link: (linkData as { properties?: { action_link?: string } })?.properties?.action_link,
+        link: (linkData as unknown as { properties?: { action_link?: string } })?.properties?.action_link,
         userExisted: !!found,
       });
     }
