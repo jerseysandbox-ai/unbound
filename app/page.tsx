@@ -222,9 +222,9 @@ export default function HomePage() {
         <div className="bg-[#e8f4f3] rounded-2xl px-6 py-5 text-center">
           <p className="text-[#2d2d2d] font-semibold text-lg mb-1">Simple, honest pricing</p>
           <p className="text-[#5a5550] text-sm">
-            First plan: <strong className="text-[#5b8f8a]">FREE</strong> &nbsp;·&nbsp;
-            Plan 2+: <strong>$9 each</strong> &nbsp;·&nbsp;
-            No subscription. No commitment.
+            First 4 plans: <strong className="text-[#5b8f8a]">FREE</strong> &nbsp;·&nbsp;
+            Then <strong>$19/month</strong> or <strong>$149/year</strong> &nbsp;·&nbsp;
+            Cancel anytime.
           </p>
         </div>
       </section>

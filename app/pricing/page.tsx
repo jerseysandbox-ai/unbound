@@ -229,7 +229,9 @@ export default function PricingPage() {
                 : "bg-[#5b8f8a] text-white hover:bg-[#4a7b76] disabled:opacity-60"
             }`}
           >
-            {checkoutLoading === "monthly"
+            {loading
+              ? "Loading…"
+              : checkoutLoading === "monthly"
               ? "Redirecting…"
               : isCurrentPlan("monthly")
               ? "Current Plan"
@@ -293,7 +295,9 @@ export default function PricingPage() {
                 : "bg-[#5b8f8a] text-white hover:bg-[#4a7b76] disabled:opacity-60"
             }`}
           >
-            {checkoutLoading === "annual"
+            {loading
+              ? "Loading…"
+              : checkoutLoading === "annual"
               ? "Redirecting…"
               : isCurrentPlan("annual")
               ? "Current Plan"

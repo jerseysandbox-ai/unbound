@@ -102,6 +102,18 @@ async function callClaude(systemPrompt: string, userMessage: string, maxTokens =
   return firstBlock.text;
 }
 
+// ─── Sanitize free-text profile fields before prompt injection ───────────────
+// Prevents prompt injection attacks via user-supplied strings.
+
+function sanitizeField(value: string | undefined, maxLength = 300): string {
+  if (!value) return "";
+  return value
+    .slice(0, maxLength)
+    .replace(/\[SYSTEM\]|\[INST\]|\[\/INST\]/gi, "")
+    .replace(/ignore (all |previous )?instructions?/gi, "")
+    .trim();
+}
+
 // ─── Format profile for injection into prompts ──────────────────────────────
 
 function formatProfile(profile: ChildProfile): string {
@@ -127,16 +139,16 @@ function formatProfile(profile: ChildProfile): string {
   };
 
   const lines = [
-    `Nickname: ${profile.childName}`,
+    `Nickname: ${sanitizeField(profile.childName, 50)}`,
     `Grade Level: ${gradeLabels[profile.gradeLevel] || profile.gradeLevel}`,
-    `Top Interests: ${profile.interests}`,
-    `What They Find Tough: ${profile.learningChallenges}`,
+    `Top Interests: ${sanitizeField(profile.interests, 300)}`,
+    `What They Find Tough: ${sanitizeField(profile.learningChallenges, 300)}`,
     `Session Length Today: ${sessionLabels[profile.sessionLength] || profile.sessionLength}`,
-    `Parent's Priority Today: ${profile.focusToday}`,
+    `Parent's Priority Today: ${sanitizeField(profile.focusToday, 300)}`,
   ];
 
   if (profile.learningStyleNotes?.trim()) {
-    lines.push(`Learning Style Notes: ${profile.learningStyleNotes}`);
+    lines.push(`Learning Style Notes: ${sanitizeField(profile.learningStyleNotes, 300)}`);
   }
 
   if (profile.energyCheck) {

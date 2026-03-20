@@ -141,6 +141,18 @@ export async function POST(request: Request) {
     const outline = await generateOutline(resolvedProfile!, safeTweaks, safeGlobalFeedback);
 
     // ── Store outline in KV ──────────────────────────────────────────────────
+    // Determine userId for ownership checks (free sessions store it in KV, paid via Supabase auth)
+    let outlineUserId: string | undefined;
+    if (paymentIntentId.startsWith("free_")) {
+      outlineUserId = (await kv.get<string>(`free_user:${paymentIntentId}`)) ?? undefined;
+    } else {
+      // For paid sessions, get userId from Supabase auth
+      const { createClient } = await import("@/lib/supabase/server");
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      outlineUserId = user?.id;
+    }
+
     const safeOutline = {
       childBrief: outline.childBrief,
       subjects: outline.subjects,
@@ -148,6 +160,8 @@ export async function POST(request: Request) {
       profile: { childName: outline.profile.childName },
       // Full profile stored for phase 2 use and regeneration (never loses session)
       fullProfile: resolvedProfile,
+      // userId stored for ownership verification in get-outline
+      userId: outlineUserId,
     };
     await kv.set(`outline:${paymentIntentId}`, safeOutline, { ex: KV_TTL });
     // Also store profile separately so regeneration can always retrieve it
