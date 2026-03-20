@@ -21,12 +21,13 @@ export async function POST(request: Request) {
   );
 
   // Look up user by email
-  const { data: authUser, error: authErr } = await supabase.auth.admin.getUserByEmail(email);
-  if (authErr || !authUser?.user) {
+  const { data: listData, error: authErr } = await supabase.auth.admin.listUsers();
+  const authUser = listData?.users?.find((u) => u.email === email);
+  if (authErr || !authUser) {
     return NextResponse.json({ error: `User not found: ${authErr?.message}` }, { status: 404 });
   }
 
-  const userId = authUser.user.id;
+  const userId = authUser.id;
 
   // Set is_unlimited=true and reset free_plan_used
   const { error: updateErr } = await supabase
