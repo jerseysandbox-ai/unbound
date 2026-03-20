@@ -24,53 +24,42 @@ export async function GET() {
     apiVersion: "2026-02-25.clover",
   });
 
-  // Helper: find an existing product by metadata tag so this is idempotent
-  async function findOrCreateProduct(name: string, tag: string) {
-    const existing = await stripe.products.search({
-      query: `metadata['unbound_tag']:'${tag}'`,
+  try {
+    // Create monthly product + price
+    const monthlyProduct = await stripe.products.create({
+      name: "Unbound Monthly",
+      metadata: { unbound_tag: "unbound_monthly" },
     });
-    if (existing.data.length > 0) return existing.data[0];
-    return stripe.products.create({
-      name,
-      metadata: { unbound_tag: tag },
-    });
-  }
-
-  // Create/retrieve Monthly product + price
-  const monthlyProduct = await findOrCreateProduct("Unbound Monthly", "unbound_monthly");
-  let monthlyPrice = (
-    await stripe.prices.list({ product: monthlyProduct.id, active: true, limit: 1 })
-  ).data[0];
-  if (!monthlyPrice) {
-    monthlyPrice = await stripe.prices.create({
+    const monthlyPrice = await stripe.prices.create({
       product: monthlyProduct.id,
-      unit_amount: 1900, // $19.00
+      unit_amount: 1900,
       currency: "usd",
       recurring: { interval: "month" },
       nickname: "Unbound Monthly $19",
     });
-  }
 
-  // Create/retrieve Annual product + price
-  const annualProduct = await findOrCreateProduct("Unbound Annual", "unbound_annual");
-  let annualPrice = (
-    await stripe.prices.list({ product: annualProduct.id, active: true, limit: 1 })
-  ).data[0];
-  if (!annualPrice) {
-    annualPrice = await stripe.prices.create({
+    // Create annual product + price
+    const annualProduct = await stripe.products.create({
+      name: "Unbound Annual",
+      metadata: { unbound_tag: "unbound_annual" },
+    });
+    const annualPrice = await stripe.prices.create({
       product: annualProduct.id,
-      unit_amount: 14900, // $149.00
+      unit_amount: 14900,
       currency: "usd",
       recurring: { interval: "year" },
       nickname: "Unbound Annual $149",
     });
-  }
 
-  return NextResponse.json({
-    message: "Stripe products and prices ready. Add these to Doppler:",
-    STRIPE_MONTHLY_PRICE_ID: monthlyPrice.id,
-    STRIPE_ANNUAL_PRICE_ID: annualPrice.id,
-    monthlyProduct: monthlyProduct.id,
-    annualProduct: annualProduct.id,
-  });
+    return NextResponse.json({
+      message: "Done. Add these to Doppler (unbound project):",
+      STRIPE_MONTHLY_PRICE_ID: monthlyPrice.id,
+      STRIPE_ANNUAL_PRICE_ID: annualPrice.id,
+      monthlyProductId: monthlyProduct.id,
+      annualProductId: annualProduct.id,
+    });
+  } catch (err) {
+    console.error("[init-stripe] Stripe error:", err);
+    return NextResponse.json({ error: String(err) }, { status: 500 });
+  }
 }
