@@ -2,9 +2,11 @@
  * POST /api/check-free-plan
  *
  * Checks whether the authenticated user is eligible for a free plan.
+ * Free tier: up to 4 plans total (tracked by plans_used column).
+ *
  * If yes: generates a freeSessionId, atomically claims it in KV, and
  * returns { isFree: true, freeSessionId }.
- * If no: returns { isFree: false } so the client proceeds to Stripe.
+ * If no: returns { isFree: false } with upgrade hint.
  *
  * Body: { turnstileToken: string }
  *
@@ -16,11 +18,15 @@
 import { NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { randomUUID } from "crypto";
 import { ADMIN_EMAILS } from "@/lib/config";
 
 // 24 hours in seconds
 const KV_TTL = 86400;
+
+// Free plan limit — users can generate this many plans before needing to upgrade
+const FREE_PLAN_LIMIT = 4;
 
 /** Verifies a Cloudflare Turnstile token server-side. Returns true if valid. */
 async function verifyTurnstile(token: string): Promise<boolean> {
@@ -67,14 +73,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    // Check free_plan_used and is_unlimited in Supabase
-    const { data: userData, error: dbError } = await supabase
+    // Use admin client to bypass RLS for subscription status reads
+    const adminSupabase = createAdminClient();
+    const { data: userData, error: dbError } = await adminSupabase
       .from("unbound_users")
-      .select("free_plan_used, is_unlimited")
+      .select("plans_used, subscription_status, is_unlimited")
       .eq("id", user.id)
       .single();
 
-    // Admin emails and is_unlimited accounts always bypass ALL checks
+    // ── Admins and is_unlimited accounts always bypass ALL plan limits ────────
     const isAdmin = ADMIN_EMAILS.includes(user.email ?? "");
     if (isAdmin || (!dbError && userData?.is_unlimited)) {
       const freeSessionId = `free_${randomUUID()}`;
@@ -83,9 +90,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ isFree: true, freeSessionId });
     }
 
+    // ── Active subscribers always bypass plan limits ───────────────────────
+    if (!dbError && userData?.subscription_status === "active") {
+      const freeSessionId = `free_${randomUUID()}`;
+      await kv.set(`status:${freeSessionId}`, { phase: "pending", progress: 0 }, { ex: KV_TTL });
+      await kv.set(`free_user:${freeSessionId}`, user.id, { ex: KV_TTL });
+      return NextResponse.json({ isFree: true, freeSessionId });
+    }
+
     if (dbError || !userData) {
       // User row may not exist yet (race condition on signup trigger)
-      // Default to allowing free plan — generate session and claim atomically
+      // Default to allowing plan — generate session and claim atomically
       const freeSessionId = `free_${randomUUID()}`;
 
       // Atomic claim: NX ensures only one concurrent request can succeed
@@ -96,7 +111,7 @@ export async function POST(request: Request) {
       );
       if (claimed === null) {
         return NextResponse.json(
-          { error: "Free plan already being generated" },
+          { error: "A plan is already being generated" },
           { status: 409 }
         );
       }
@@ -106,12 +121,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ isFree: true, freeSessionId });
     }
 
-    if (userData.free_plan_used) {
-      // User has already used their free plan — proceed to Stripe
-      return NextResponse.json({ isFree: false });
+    // ── Check free plan limit (plans_used < FREE_PLAN_LIMIT) ──────────────
+    const plansUsed = userData.plans_used ?? 0;
+
+    if (plansUsed >= FREE_PLAN_LIMIT) {
+      // User has hit their free plan limit — send them to upgrade
+      return NextResponse.json({
+        isFree: false,
+        upgradeRequired: true,
+        plansUsed,
+        limit: FREE_PLAN_LIMIT,
+      });
     }
 
-    // First free plan — atomically claim BEFORE generation to prevent race conditions
+    // Still has free plans remaining — atomically claim a session
     const freeSessionId = `free_${randomUUID()}`;
 
     const claimed = await kv.set(
@@ -121,7 +144,7 @@ export async function POST(request: Request) {
     );
     if (claimed === null) {
       return NextResponse.json(
-        { error: "Free plan already being generated" },
+        { error: "A plan is already being generated" },
         { status: 409 }
       );
     }
@@ -129,7 +152,12 @@ export async function POST(request: Request) {
     await kv.set(`status:${freeSessionId}`, { phase: "pending", progress: 0 }, { ex: KV_TTL });
     await kv.set(`free_user:${freeSessionId}`, user.id, { ex: KV_TTL });
 
-    return NextResponse.json({ isFree: true, freeSessionId });
+    return NextResponse.json({
+      isFree: true,
+      freeSessionId,
+      plansUsed,
+      plansRemaining: FREE_PLAN_LIMIT - plansUsed,
+    });
   } catch (err: unknown) {
     console.error("[check-free-plan] Error:", err);
     return NextResponse.json({ error: "Failed to check plan status" }, { status: 500 });

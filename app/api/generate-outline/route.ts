@@ -87,6 +87,32 @@ export async function POST(request: Request) {
       resolvedProfile = storedOutline.fullProfile;
     }
 
+    // ── For free sessions: verify user still has free plans remaining ────────
+    // Subscribers (subscription_status='active') skip this check entirely.
+    if (paymentIntentId.startsWith("free_") && !regenerate) {
+      const userId = await kv.get<string>(`free_user:${paymentIntentId}`);
+      if (userId) {
+        const { createAdminClient } = await import("@/lib/supabase/server");
+        const adminSupabase = createAdminClient();
+        const { data: userData } = await adminSupabase
+          .from("unbound_users")
+          .select("subscription_status, plans_used")
+          .eq("id", userId)
+          .single();
+
+        const isSubscribed = userData?.subscription_status === "active";
+        const plansUsed = userData?.plans_used ?? 0;
+        const FREE_PLAN_LIMIT = 4;
+
+        if (!isSubscribed && plansUsed >= FREE_PLAN_LIMIT) {
+          return NextResponse.json(
+            { error: "upgrade_required", upgradeUrl: "/pricing" },
+            { status: 403 }
+          );
+        }
+      }
+    }
+
     // ── Verify payment succeeded (skip for free sessions) ────────────────────
     // Free sessions use a UUID prefix "free_" instead of a Stripe PI ID
     if (!paymentIntentId.startsWith("free_")) {
@@ -134,17 +160,17 @@ export async function POST(request: Request) {
       { ex: KV_TTL }
     );
 
-    // ── For free sessions: mark user's free plan as used ─────────────────────
+    // ── For free sessions: increment plans_used counter ──────────────────────
+    // We only increment on the outline step (phase 1) to count each unique plan.
+    // Phase 2 (generate-full-plan) does NOT increment again to avoid double-counting.
     if (paymentIntentId.startsWith("free_") && !regenerate) {
       const userId = await kv.get<string>(`free_user:${paymentIntentId}`);
       if (userId) {
         // Import admin client inline to avoid circular deps
         const { createAdminClient } = await import("@/lib/supabase/server");
         const adminSupabase = createAdminClient();
-        await adminSupabase
-          .from("unbound_users")
-          .upsert({ id: userId, free_plan_used: true, updated_at: new Date().toISOString() })
-          .eq("id", userId);
+        // Increment plans_used — free tier allows up to 4 total plans
+        await adminSupabase.rpc("increment_plans_used", { user_id: userId });
       }
     }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { UpgradeModal, UpgradeBanner } from "@/components/UpgradeModal";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
@@ -116,14 +117,28 @@ export default function ProfilePage() {
   const [consentError, setConsentError] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // Upgrade modal state — shown when user hits free plan limit
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [plansUsed, setPlansUsed] = useState(0);
 
   // On mount, get user ID then load their saved Layer 1 profile from localStorage
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       const uid = data.user?.id ?? null;
       setUserId(uid);
       if (!uid) return;
+
+      // Load plans_used to show upgrade banner when near/at limit
+      const { data: userData } = await supabase
+        .from("unbound_users")
+        .select("plans_used")
+        .eq("id", uid)
+        .single();
+      if (userData?.plans_used != null) {
+        setPlansUsed(userData.plans_used);
+      }
+
       const saved = readSavedProfile(uid);
       if (saved) {
         setHasSavedProfile(true);
@@ -228,10 +243,18 @@ export default function ProfilePage() {
         throw new Error(data.error || "Failed to check plan status");
       }
 
-      const { isFree, freeSessionId } = await checkRes.json();
+      const checkData = await checkRes.json();
+      const { isFree, freeSessionId, upgradeRequired } = checkData;
+
+      if (upgradeRequired) {
+        // User has hit their free plan limit — show upgrade modal
+        setShowUpgradeModal(true);
+        setSubmitting(false);
+        return;
+      }
 
       if (isFree && freeSessionId) {
-        // First plan is free — skip Stripe entirely
+        // Free plan available — skip Stripe entirely
         // Profile already stored in sessionStorage above for generating page to read
         router.push(`/generating/${freeSessionId}?phase=outline`);
         return;
@@ -280,6 +303,13 @@ export default function ProfilePage() {
               : "The more detail you share, the better the plan. Takes about 3 minutes."}
           </p>
         </div>
+
+        {/* Upgrade banner — shows when user is near or at free plan limit */}
+        {plansUsed >= 3 && (
+          <div className="mb-4">
+            <UpgradeBanner plansUsed={plansUsed} />
+          </div>
+        )}
 
         <form
           onSubmit={handleSubmit}
@@ -573,6 +603,12 @@ export default function ProfilePage() {
           </p>
         </form>
       </div>
+      {/* Upgrade modal — shown when free plan limit is reached */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        plansUsed={plansUsed}
+      />
     </main>
   );
 }

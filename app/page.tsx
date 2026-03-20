@@ -156,7 +156,7 @@ export default function HomePage() {
       <section className="max-w-2xl mx-auto px-6 pt-12 pb-10 text-center">
         {/* Free plan badge */}
         <div className="inline-block bg-[#fef3c7] text-[#92400e] text-sm font-semibold px-4 py-1.5 rounded-full mb-4 border border-[#fde68a]">
-          🎉 Your first plan is completely free
+          🎉 Your first 4 plans are completely free
         </div>
         <div className="inline-block bg-[#e8f4f3] text-[#3d6e69] text-sm font-medium px-3 py-1 rounded-full mb-4 ml-2">
           Personalized homeschool plans, instantly
@@ -179,7 +179,7 @@ export default function HomePage() {
           {userEmail ? "Create Today's Plan" : "Get Started - First Plan Free"}
         </Link>
         <p className="mt-4 text-sm text-[#8a8580]">
-          First plan free · $19/month after · Cancel anytime
+          4 free plans · $19/month after · Cancel anytime
         </p>
       </section>
 
@@ -193,7 +193,7 @@ export default function HomePage() {
             {
               step: "1",
               title: "Create your free account",
-              desc: "Sign up in seconds. No credit card needed. Your first plan is on us.",
+              desc: "Sign up in seconds. No credit card needed. Your first 4 plans are on us.",
             },
             {
               step: "2",
@@ -306,7 +306,7 @@ export default function HomePage() {
           Ready to try it?
         </h2>
         <p className="text-[#8a8580] mb-8">
-          No subscription. Your first plan is free. Just create an account and go.
+          No subscription. Your first 4 plans are free. Just create an account and go.
         </p>
         <Link
           href={userEmail ? "/profile" : "/signup"}

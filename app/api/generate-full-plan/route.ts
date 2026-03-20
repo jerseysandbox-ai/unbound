@@ -80,14 +80,20 @@ export async function POST(request: Request) {
         const adminSupabase = createAdminClient();
         const { data: userData } = await adminSupabase
           .from("unbound_users")
-          .select("free_plan_used")
+          // Check subscription status and plans_used for free plan eligibility
+          .select("subscription_status, plans_used")
           .eq("id", userId)
           .single();
 
-        if (userData?.free_plan_used) {
+        // Active subscribers have unlimited access — only gate free users
+        const isSubscribed = userData?.subscription_status === "active";
+        const plansUsed = userData?.plans_used ?? 0;
+        const FREE_PLAN_LIMIT = 4;
+
+        if (!isSubscribed && plansUsed >= FREE_PLAN_LIMIT) {
           return NextResponse.json(
-            { error: "Free plan has already been used" },
-            { status: 402 }
+            { error: "upgrade_required", upgradeUrl: "/pricing" },
+            { status: 403 }
           );
         }
       }
@@ -165,18 +171,8 @@ export async function POST(request: Request) {
       { ex: KV_TTL }
     );
 
-    // ── For free sessions: mark free plan as used in Supabase ────────────────
-    if (paymentIntentId.startsWith("free_")) {
-      const userId = await kv.get<string>(`free_user:${paymentIntentId}`);
-      if (userId) {
-        const { createAdminClient } = await import("@/lib/supabase/server");
-        const adminSupabase = createAdminClient();
-        await adminSupabase
-          .from("unbound_users")
-          .upsert({ id: userId, free_plan_used: true, updated_at: new Date().toISOString() })
-          .eq("id", userId);
-      }
-    }
+    // ── plans_used is incremented in generate-outline (phase 1) ─────────────
+    // We do NOT increment here to avoid double-counting the same plan generation.
 
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
