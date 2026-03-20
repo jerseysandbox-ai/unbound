@@ -2,7 +2,7 @@
  * POST /api/check-free-plan
  *
  * Checks whether the authenticated user is eligible for a free plan.
- * Free tier: up to 4 plans total (tracked by plans_used column).
+ * Free tier: up to 1 plan total (tracked by plans_used column).
  *
  * If yes: generates a freeSessionId, atomically claims it in KV, and
  * returns { isFree: true, freeSessionId }.

@@ -2,7 +2,7 @@
  * /pricing
  *
  * Clean, mobile-responsive pricing page showing the 3 tiers:
- *   Free (4 plans) | Monthly ($19/mo) | Annual ($149/yr — "Best Value")
+ *   Free (1 plan) | Monthly ($19/mo) | Annual ($149/yr — "Best Value")
  *
  * Handles subscription checkout by posting to /api/create-checkout-session
  * and redirecting to the returned Stripe Checkout URL.
@@ -114,7 +114,7 @@ export default function PricingPage() {
 
   const isSubscribed = userData?.subscription_status === "active";
   const plansUsed = userData?.plans_used ?? 0;
-  const freePlansLeft = Math.max(0, 4 - plansUsed);
+  const freePlansLeft = Math.max(0, 1 - plansUsed);
 
   return (
     <main className="min-h-screen bg-[#faf9f6] px-4 py-12">
@@ -171,7 +171,7 @@ export default function PricingPage() {
           {/* Show plans remaining for free users */}
           {!loading && isCurrentPlan("free") && (
             <p className="text-xs text-[#8a8580] text-center mb-3">
-              {freePlansLeft} of 4 free plans remaining
+              {freePlansLeft} of 1 free plan remaining
             </p>
           )}
 
