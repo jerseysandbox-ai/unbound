@@ -23,6 +23,32 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 // prompt injection and runaway token costs
 const MAX_FEEDBACK_CHARS = 500;
 
+// ─── Sanitize profile fields before injecting into prompts ───────────────────
+// Defense-in-depth against prompt injection via user-supplied profile data.
+function sanitizeField(value: string | undefined, maxLength = 300): string {
+  if (!value) return "";
+  return value
+    .slice(0, maxLength)
+    .replace(/IGNORE/gi, "")
+    .replace(/\[INST\]|\[\/INST\]|\[SYSTEM\]/gi, "")
+    .replace(/<\|/g, "")
+    .replace(/\]\]>/g, "")
+    .trim();
+}
+
+function sanitizeProfile(profile: ChildProfile): ChildProfile {
+  return {
+    ...profile,
+    childName: sanitizeField(profile.childName, 50),
+    interests: sanitizeField(profile.interests, 300),
+    learningChallenges: sanitizeField(profile.learningChallenges, 300),
+    focusToday: sanitizeField(profile.focusToday, 300),
+    stateStandards: sanitizeField(profile.stateStandards, 300),
+    materialsNotes: sanitizeField(profile.materialsNotes, 300),
+    learningStyleNotes: sanitizeField(profile.learningStyleNotes, 300),
+  };
+}
+
 // 5-minute timeout — full pipeline with 7 parallel specialists + Architect
 export const maxDuration = 300;
 
@@ -131,11 +157,12 @@ export async function POST(request: Request) {
     );
 
     // Reconstruct the outline object expected by generateFullPlan
+    // Sanitize profile fields before injecting into agent prompts
     const outline: GeneratedOutline = {
       childBrief: storedOutline.childBrief,
       subjects: storedOutline.subjects,
       generatedAt: storedOutline.generatedAt,
-      profile: storedOutline.fullProfile,
+      profile: sanitizeProfile(storedOutline.fullProfile),
     };
 
     // ── Run full pipeline with progress callbacks ────────────────────────────
@@ -152,8 +179,21 @@ export async function POST(request: Request) {
       }
     );
 
+    // ── Resolve userId for ownership checks ─────────────────────────────────
+    let planUserId: string | undefined;
+    if (paymentIntentId.startsWith("free_")) {
+      planUserId = (await kv.get<string>(`free_user:${paymentIntentId}`)) ?? undefined;
+    } else {
+      // Paid plan: get from Supabase auth session
+      const { createClient } = await import("@/lib/supabase/server");
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      planUserId = user?.id;
+    }
+
     // ── Store completed plan in KV ───────────────────────────────────────────
     // Store plan content + first name only — no sensitive profile data
+    // userId is included so get-plan can enforce ownership checks
     const safeStoredPlan = {
       plan: generatedPlan.plan,
       childBrief: generatedPlan.childBrief,
@@ -161,6 +201,7 @@ export async function POST(request: Request) {
       quote: generatedPlan.quote ?? null,
       generatedAt: generatedPlan.generatedAt,
       profile: { childName: generatedPlan.profile.childName },
+      userId: planUserId,
     };
     await kv.set(`plan:${paymentIntentId}`, safeStoredPlan, { ex: KV_TTL });
 

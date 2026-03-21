@@ -10,6 +10,7 @@
 
 import { NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
+import { createClient } from "@/lib/supabase/server";
 
 interface StatusRecord {
   phase: "generating_outline" | "outline_ready" | "generating_full" | "complete" | "error";
@@ -22,6 +23,13 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Auth check — require a valid logged-in session
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await params;
 
   if (!id) {
