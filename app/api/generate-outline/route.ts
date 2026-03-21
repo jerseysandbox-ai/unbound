@@ -41,6 +41,32 @@ const KV_TTL = 86400;
 // Max characters for feedback fields
 const MAX_FEEDBACK_CHARS = 500;
 
+// ─── Sanitize profile fields before injecting into prompts ───────────────────
+// Defense-in-depth against prompt injection via user-supplied profile data.
+function sanitizeField(value: string | undefined, maxLength = 300): string {
+  if (!value) return "";
+  return value
+    .slice(0, maxLength)
+    .replace(/IGNORE/gi, "")
+    .replace(/\[INST\]|\[\/INST\]|\[SYSTEM\]/gi, "")
+    .replace(/<\|/g, "")
+    .replace(/\]\]>/g, "")
+    .trim();
+}
+
+function sanitizeProfile(profile: ChildProfile): ChildProfile {
+  return {
+    ...profile,
+    childName: sanitizeField(profile.childName, 50),
+    interests: sanitizeField(profile.interests, 300),
+    learningChallenges: sanitizeField(profile.learningChallenges, 300),
+    focusToday: sanitizeField(profile.focusToday, 300),
+    stateStandards: sanitizeField(profile.stateStandards, 300),
+    materialsNotes: sanitizeField(profile.materialsNotes, 300),
+    learningStyleNotes: sanitizeField(profile.learningStyleNotes, 300),
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -138,7 +164,8 @@ export async function POST(request: Request) {
     );
 
     // ── Run Sage + Planner (with optional feedback for regeneration) ─────────
-    const outline = await generateOutline(resolvedProfile!, safeTweaks, safeGlobalFeedback);
+    // Sanitize profile fields before injecting into agent prompts
+    const outline = await generateOutline(sanitizeProfile(resolvedProfile!), safeTweaks, safeGlobalFeedback);
 
     // ── Store outline in KV ──────────────────────────────────────────────────
     // Determine userId for ownership checks (free sessions store it in KV, paid via Supabase auth)
