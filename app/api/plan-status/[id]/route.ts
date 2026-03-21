@@ -23,7 +23,7 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // Auth check — require a valid logged-in session
+  // Auth check — must be logged in to poll plan status
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
