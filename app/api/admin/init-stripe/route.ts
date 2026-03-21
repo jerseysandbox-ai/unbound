@@ -25,34 +25,51 @@ export async function GET() {
   });
 
   try {
-    // Create monthly product + price
-    const monthlyProduct = await stripe.products.create({
-      name: "Unbound Monthly",
-      metadata: { unbound_tag: "unbound_monthly" },
-    });
-    const monthlyPrice = await stripe.prices.create({
-      product: monthlyProduct.id,
-      unit_amount: 1900,
-      currency: "usd",
-      recurring: { interval: "month" },
-      nickname: "Unbound Monthly $19",
-    });
+    // Idempotency: list existing products and reuse if already created
+    const existing = await stripe.products.list({ limit: 100, active: true });
+    const existingMonthly = existing.data.find(p => p.metadata?.unbound_tag === "unbound_monthly");
+    const existingAnnual = existing.data.find(p => p.metadata?.unbound_tag === "unbound_annual");
 
-    // Create annual product + price
-    const annualProduct = await stripe.products.create({
-      name: "Unbound Annual",
-      metadata: { unbound_tag: "unbound_annual" },
-    });
-    const annualPrice = await stripe.prices.create({
-      product: annualProduct.id,
-      unit_amount: 14900,
-      currency: "usd",
-      recurring: { interval: "year" },
-      nickname: "Unbound Annual $149",
-    });
+    // Get or create monthly product + price
+    let monthlyProduct = existingMonthly;
+    if (!monthlyProduct) {
+      monthlyProduct = await stripe.products.create({
+        name: "Unbound Monthly",
+        metadata: { unbound_tag: "unbound_monthly" },
+      });
+    }
+    const monthlyPrices = await stripe.prices.list({ product: monthlyProduct.id, active: true, limit: 10 });
+    const monthlyPrice = monthlyPrices.data.find(p => p.recurring?.interval === "month")
+      ?? await stripe.prices.create({
+        product: monthlyProduct.id,
+        unit_amount: 1900,
+        currency: "usd",
+        recurring: { interval: "month" },
+        nickname: "Unbound Monthly $19",
+      });
+
+    // Get or create annual product + price
+    let annualProduct = existingAnnual;
+    if (!annualProduct) {
+      annualProduct = await stripe.products.create({
+        name: "Unbound Annual",
+        metadata: { unbound_tag: "unbound_annual" },
+      });
+    }
+    const annualPrices = await stripe.prices.list({ product: annualProduct.id, active: true, limit: 10 });
+    const annualPrice = annualPrices.data.find(p => p.recurring?.interval === "year")
+      ?? await stripe.prices.create({
+        product: annualProduct.id,
+        unit_amount: 14900,
+        currency: "usd",
+        recurring: { interval: "year" },
+        nickname: "Unbound Annual $149",
+      });
 
     return NextResponse.json({
-      message: "Done. Add these to Doppler (unbound project):",
+      message: existingMonthly && existingAnnual
+        ? "Products already exist — returning existing price IDs."
+        : "Done. Add these to Doppler (unbound project):",
       STRIPE_MONTHLY_PRICE_ID: monthlyPrice.id,
       STRIPE_ANNUAL_PRICE_ID: annualPrice.id,
       monthlyProductId: monthlyProduct.id,
