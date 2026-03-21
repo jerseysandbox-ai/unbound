@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { version } from "../package.json";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
@@ -38,7 +39,13 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} ${playfair.variable} font-sans`}>{children}</body>
+      <body className={`${inter.variable} ${playfair.variable} font-sans`}>
+        {children}
+        {/* Version badge — bottom-right corner, unobtrusive */}
+        <div className="fixed bottom-2 right-2 text-[10px] text-gray-400 opacity-50 select-none pointer-events-none z-50">
+          v{version}{process.env.NEXT_PUBLIC_ENV ? ` (${process.env.NEXT_PUBLIC_ENV})` : ""}
+        </div>
+      </body>
     </html>
   );
 }
