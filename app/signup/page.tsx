@@ -77,7 +77,7 @@ export default function SignupPage() {
           </Link>
           <h1 className="text-2xl font-bold text-[#2d2d2d] mt-4 mb-1">Create your account</h1>
           <p className="text-[#8a8580] text-sm">
-            Your first plan is <span className="font-semibold text-[#5b8f8a]">completely free</span> 🎉
+            Your first 4 plans are <span className="font-semibold text-[#5b8f8a]">completely free</span> 🎉
           </p>
         </div>
 
