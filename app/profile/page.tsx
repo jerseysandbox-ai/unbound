@@ -599,7 +599,7 @@ export default function ProfilePage() {
           </button>
 
           <p className="text-center text-xs text-[#8a8580]">
-            🎉 Your first plan is free! Plans 2+ are $9 each. No subscription ever.
+            🎉 Your first 4 plans are free! Plans 5+ require a subscription.
           </p>
         </form>
       </div>
