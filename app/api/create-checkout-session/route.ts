@@ -9,6 +9,8 @@
  */
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+
+export const dynamic = "force-dynamic";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/server";
 
