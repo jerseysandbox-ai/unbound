@@ -19,9 +19,11 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/server";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover",
-});
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2026-02-25.clover",
+  });
+}
 
 // Disable Next.js body parsing — Stripe signature verification requires raw bytes
 export const config = { api: { bodyParser: false } };
@@ -63,7 +65,7 @@ export async function POST(request: Request) {
   // Verify webhook authenticity — throws if invalid
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(
+    event = getStripe().webhooks.constructEvent(
       rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!
@@ -85,7 +87,7 @@ export async function POST(request: Request) {
         if (session.mode !== "subscription") break;
 
         // Retrieve the subscription to get period_end + price info
-        const subscription = await stripe.subscriptions.retrieve(
+        const subscription = await getStripe().subscriptions.retrieve(
           session.subscription as string
         );
 
