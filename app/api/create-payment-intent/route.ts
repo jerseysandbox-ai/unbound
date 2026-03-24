@@ -10,9 +10,11 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover",
-});
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2026-02-25.clover",
+  });
+}
 
 const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY!;
 const PLAN_PRICE_CENTS = 900; // $9.00
@@ -51,7 +53,7 @@ export async function POST(request: Request) {
     }
 
     // ── Create Stripe PaymentIntent ─────────────────────────────────────────
-    const paymentIntent = await stripe.paymentIntents.create({
+    const paymentIntent = await getStripe().paymentIntents.create({
       amount: PLAN_PRICE_CENTS,
       currency: "usd",
       description: "Unbound: Personalized Daily Lesson Plan",
