@@ -13,6 +13,8 @@
  * Security: Stripe signature verified using STRIPE_WEBHOOK_SECRET env var.
  * Body must be raw bytes — Next.js must NOT parse it as JSON before we do.
  */
+
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/server";
