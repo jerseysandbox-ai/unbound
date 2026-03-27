@@ -13,9 +13,9 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Unbound: Personalized Homeschool Plans for Neurodivergent Kids",
+  title: "Unbound: Personalized Homeschool Plans for Neurodivergent & Gifted Kids",
   description:
-    "AI-powered daily lesson plans tailored to your child's unique learning style. Personalized homeschool curriculum, built for your family.",
+    "AI-powered daily lesson plans for neurodivergent and gifted learners. Deeply personalized homeschool curriculum built around your child's unique needs, abilities, and goals.",
 };
 
 export default function RootLayout({

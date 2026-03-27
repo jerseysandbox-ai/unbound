@@ -80,6 +80,14 @@ const IconBook = () => (
   </svg>
 );
 
+// Map icon for Field Trip Finder card
+const IconMap = () => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+    <path d="M1 4.5l6-2 6 2 6-2v13l-6 2-6-2-6 2v-13z" />
+    <path d="M7 2.5v13M13 4.5v13" />
+  </svg>
+);
+
 // Sparkle icon for Book Recommendations card
 const IconSparkle = () => (
   <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
@@ -159,17 +167,18 @@ export default function HomePage() {
           🎉 Your first 4 plans are completely free
         </div>
         <div className="inline-block bg-[#e8f4f3] text-[#3d6e69] text-sm font-medium px-3 py-1 rounded-full mb-4 ml-2">
-          Personalized homeschool plans, instantly
+          Built for neurodivergent &amp; gifted learners
         </div>
         <h1 className="font-display text-4xl sm:text-5xl font-bold leading-tight mb-6">
           {/* Line 1 — dark */}
-          <span className="block text-[#2d2d2d]">A lesson plan made</span>
-          {/* Line 2 — teal, includes "just" */}
-          <span className="block text-[#1a5c5a]">just for your child.</span>
+          <span className="block text-[#2d2d2d]">Homeschool curriculum built</span>
+          {/* Line 2 — teal */}
+          <span className="block text-[#1a5c5a]">around <em>your</em> child.</span>
         </h1>
         <p className="text-lg text-[#8a8580] mb-10 leading-relaxed">
-          Tell us about your learner and get a full personalized daily plan
-          built around their interests, their pace, and your goals for today.
+          Personalized for neurodivergent and gifted learners — because no two kids
+          learn the same way. Tell us about your child and get a full daily plan shaped
+          around their strengths, their pace, and your goals for today.
         </p>
 
         <Link
@@ -198,12 +207,12 @@ export default function HomePage() {
             {
               step: "2",
               title: "Tell us about your learner",
-              desc: "Share their grade level, interests, what they find tough, and what you want to focus on today.",
+              desc: "Share their grade level, interests, learning style, what they find tough, and what you want to focus on today. The more you tell us, the more tailored the plan.",
             },
             {
               step: "3",
               title: "Download your plan",
-              desc: "Your plan arrives with lessons for every subject, tailored to your child's interests, pace, and today's goals.",
+              desc: "Your plan arrives built around your specific child — their strengths, their pace, their interests, and your goals for the day.",
             },
           ].map(({ step, title, desc }) => (
             <div key={step} className="text-center">
@@ -249,14 +258,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Reading Tools section */}
+      {/* Tools section */}
       <section className="py-12 px-6 mt-2">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold text-center text-[#2d2d2d] mb-2">
-            Reading Tools
+            More Tools for Your Family
           </h2>
           <p className="text-center text-[#8a8580] text-sm mb-8">
-            Support independent reading and discover what to read next.
+            Reading support, book discovery, and real-world learning — all personalized to your child.
           </p>
           <div className="grid sm:grid-cols-2 gap-5">
             {/* Book Companion card */}
@@ -296,6 +305,25 @@ export default function HomePage() {
                 Get recommendations →
               </span>
             </Link>
+
+            {/* Field Trip Finder card */}
+            <Link
+              href="/field-trips"
+              className="group flex flex-col gap-3 bg-white rounded-2xl px-5 py-5 shadow-sm border border-[#ddf0ee] hover:shadow-md hover:border-[#1a5c5a] transition-all sm:col-span-2"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-[#1a5c5a] w-6 h-6 shrink-0">
+                  <IconMap />
+                </span>
+                <span className="font-semibold text-[#2d2d2d] text-base">Field Trip Finder</span>
+              </div>
+              <p className="text-sm text-[#8a8580] leading-relaxed">
+                Tell us what you&apos;re studying and your zip code — we&apos;ll suggest museums, nature centers, historical sites, and more that bring your unit to life.
+              </p>
+              <span className="text-xs font-semibold text-[#1a5c5a] group-hover:underline mt-auto">
+                Find field trips near you →
+              </span>
+            </Link>
           </div>
         </div>
       </section>
@@ -303,10 +331,11 @@ export default function HomePage() {
       {/* CTA footer */}
       <section className="max-w-2xl mx-auto px-6 py-16 text-center">
         <h2 className="text-3xl font-bold text-[#2d2d2d] mb-4">
-          Ready to try it?
+          Ready to see it in action?
         </h2>
         <p className="text-[#8a8580] mb-8">
-          No subscription. Your first 4 plans are free. Just create an account and go.
+          Your first 4 plans are free. No credit card, no subscription — just a plan built
+          around your specific kid.
         </p>
         <Link
           href={userEmail ? "/profile" : "/signup"}
