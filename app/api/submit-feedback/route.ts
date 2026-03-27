@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+const escapeHtml = (str: string): string =>
+  str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
 export async function POST(req: NextRequest) {
   const cookieStore = await cookies();
 
@@ -38,6 +41,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
+  // Issue 3: Server-side comment length validation
+  if (comment && comment.length > 140) {
+    return NextResponse.json({ error: "Comment too long" }, { status: 400 });
+  }
+
+  // Issue 2: Verify plan ownership
+  const { data: plan } = await supabase
+    .from("unbound_plans")
+    .select("id")
+    .eq("id", planId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!plan) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   // Insert feedback
   const { data: feedback, error: insertError } = await supabase
     .from("unbound_feedback")
@@ -54,6 +74,10 @@ export async function POST(req: NextRequest) {
 
   if (insertError) {
     console.error("Feedback insert error:", insertError);
+    // Issue 1: Handle unique constraint violation (duplicate feedback)
+    if (insertError.code === "23505") {
+      return NextResponse.json({ error: "Already submitted" }, { status: 409 });
+    }
     return NextResponse.json({ error: "Failed to save feedback" }, { status: 500 });
   }
 
@@ -65,14 +89,19 @@ export async function POST(req: NextRequest) {
       ? new Date(feedback.created_at).toLocaleString("en-US", { timeZone: "America/Denver" })
       : new Date().toLocaleString("en-US", { timeZone: "America/Denver" });
 
+    // Issue 5: Escape HTML in user-supplied fields
+    const safeComment = escapeHtml(commentText);
+    const safeGradeLevel = escapeHtml(gradeLevel || "Not specified");
+    const safeSubjects = escapeHtml(subjects || "Not specified");
+
     const htmlBody = `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2d2d2d;">
         <h2 style="color: #5b8f8a; margin-bottom: 16px;">New Unbound Feedback</h2>
         <table style="width: 100%; border-collapse: collapse;">
           <tr><td style="padding: 8px 0; font-weight: 600; color: #5b8f8a; width: 120px;">Rating</td><td style="padding: 8px 0;">${ratingLabel}</td></tr>
-          <tr><td style="padding: 8px 0; font-weight: 600; color: #5b8f8a;">Comment</td><td style="padding: 8px 0;">${commentText}</td></tr>
-          <tr><td style="padding: 8px 0; font-weight: 600; color: #5b8f8a;">Grade level</td><td style="padding: 8px 0;">${gradeLevel || "Not specified"}</td></tr>
-          <tr><td style="padding: 8px 0; font-weight: 600; color: #5b8f8a;">Subjects</td><td style="padding: 8px 0;">${subjects || "Not specified"}</td></tr>
+          <tr><td style="padding: 8px 0; font-weight: 600; color: #5b8f8a;">Comment</td><td style="padding: 8px 0;">${safeComment}</td></tr>
+          <tr><td style="padding: 8px 0; font-weight: 600; color: #5b8f8a;">Grade level</td><td style="padding: 8px 0;">${safeGradeLevel}</td></tr>
+          <tr><td style="padding: 8px 0; font-weight: 600; color: #5b8f8a;">Subjects</td><td style="padding: 8px 0;">${safeSubjects}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 600; color: #5b8f8a;">Time</td><td style="padding: 8px 0;">${createdAt} MT</td></tr>
         </table>
       </div>
