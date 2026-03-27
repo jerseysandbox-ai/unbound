@@ -145,15 +145,21 @@ export default function AdminDashboard() {
     });
   }
 
+  const sanitizeCSV = (val: string | null | undefined): string => {
+    if (!val) return "";
+    const s = String(val);
+    return /^[=+\-@]/.test(s) ? `'${s}` : s;
+  };
+
   function exportFeedbackCSV() {
     const header = ["id", "plan_id", "rating", "comment", "grade_level", "subjects", "created_at"];
     const rows = feedback.map((f) => [
       f.id,
       f.plan_id,
       f.rating,
-      `"${(f.comment || "").replace(/"/g, '""')}"`,
-      f.grade_level || "",
-      `"${(f.subjects || "").replace(/"/g, '""')}"`,
+      `"${sanitizeCSV(f.comment).replace(/"/g, '""')}"`,
+      sanitizeCSV(f.grade_level),
+      `"${sanitizeCSV(f.subjects).replace(/"/g, '""')}"`,
       f.created_at,
     ]);
     const csv = [header.join(","), ...rows.map((r) => r.join(","))].join("\n");
