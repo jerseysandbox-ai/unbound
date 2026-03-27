@@ -1,5 +1,18 @@
 [
   {
+    "version": "0.3.0",
+    "date": "2026-03-27",
+    "summary": "Field Trip Finder, 2e positioning, state standards + subject goals on plan form",
+    "changes": [
+      "New Field Trip Finder page (/field-trips) \u2014 subject + zip code + radius \u2192 Claude-powered suggestions",
+      "Updated positioning to neurodivergent and gifted (2e) learners throughout site",
+      "State standards toggle on plan form \u2014 select state, align lessons to academic standards",
+      "Subject goals section \u2014 specify up to 4 subjects with specific focus per session",
+      "Fixed Turnstile widget (site key was missing from Doppler)",
+      "Resend API key added \u2014 Nicole now receives email on every feedback submission"
+    ]
+  },
+  {
     "version": "0.2.3",
     "date": "2026-03-27",
     "summary": "Version history tab added to admin dashboard. Changelog tracked in lib/changelog.json, auto-displayed in admin panel newest-first."
