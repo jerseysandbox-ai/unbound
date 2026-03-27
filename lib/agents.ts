@@ -171,8 +171,25 @@ function formatProfile(profile: ChildProfile): string {
     lines.push(`Materials: No printer assumed. Use only basic household items (paper, pencil, everyday objects). Do not require any materials purchase. No printed worksheets.`);
   }
 
-  if (profile.stateStandards?.trim()) {
+  // State standards alignment
+  if (profile.useStateStandards && profile.homeState?.trim()) {
+    const gradeLabelForState = gradeLabels[profile.gradeLevel] || profile.gradeLevel;
+    lines.push(`State Standards: Please align activities to ${profile.homeState} academic standards for ${gradeLabelForState}.`);
+  } else if (profile.stateStandards?.trim()) {
     lines.push(`State Standards to Align:\n${profile.stateStandards}`);
+  }
+
+  // Session-specific subject goals
+  const validGoals = (profile.subjectGoals ?? []).filter((g) => g.subject?.trim());
+  if (validGoals.length > 0) {
+    const goalLines = validGoals
+      .map((g) =>
+        g.focus?.trim()
+          ? `- ${g.subject}: ${sanitizeField(g.focus, 200)}`
+          : `- ${g.subject}`
+      )
+      .join("\n");
+    lines.push(`Subject Goals for Today:\n${goalLines}`);
   }
 
   return lines.join("\n");
