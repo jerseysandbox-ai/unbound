@@ -21,6 +21,8 @@
  *   { success: true, outline: OutlineData } when synchronous regeneration
  */
 
+
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { kv } from "@vercel/kv";
@@ -31,9 +33,11 @@ import type { SubjectTweak } from "@/lib/agents";
 // Extend timeout - Sage + Planner takes ~15s but give headroom
 export const maxDuration = 120;
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover",
-});
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2026-02-25.clover",
+  });
+}
 
 // 24 hours in seconds
 const KV_TTL = 86400;
@@ -142,7 +146,7 @@ export async function POST(request: Request) {
     // ── Verify payment succeeded (skip for free sessions) ────────────────────
     // Free sessions use a UUID prefix "free_" instead of a Stripe PI ID
     if (!paymentIntentId.startsWith("free_")) {
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      const paymentIntent = await getStripe().paymentIntents.retrieve(paymentIntentId);
       if (paymentIntent.status !== "succeeded") {
         return NextResponse.json({ error: "Payment has not been completed" }, { status: 402 });
       }

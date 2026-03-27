@@ -9,12 +9,16 @@
  */
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+
+export const dynamic = "force-dynamic";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/server";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover",
-});
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2026-02-25.clover",
+  });
+}
 
 // Map plan name → Stripe price ID (set in Doppler/Vercel env vars)
 function getPriceId(plan: "monthly" | "annual"): string {
@@ -63,7 +67,7 @@ export async function POST(request: Request) {
 
     if (!customerId) {
       // No customer yet — create one and store it
-      const customer = await stripe.customers.create({
+      const customer = await getStripe().customers.create({
         email: user.email,
         metadata: { supabase_user_id: user.id },
       });
@@ -77,7 +81,7 @@ export async function POST(request: Request) {
     }
 
     // Build the Checkout Session
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
       line_items: [{ price: getPriceId(plan), quantity: 1 }],
