@@ -7,6 +7,8 @@
  * Body: { paymentIntentId: string, profile: ChildProfile }
  */
 
+
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -16,9 +18,11 @@ import { kv } from "@vercel/kv";
 import { generatePlan } from "@/lib/agents";
 import type { ChildProfile } from "@/app/profile/page";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover",
-});
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2026-02-25.clover",
+  });
+}
 
 // 24 hours in seconds
 const KV_TTL_SECONDS = 86400;
@@ -39,7 +43,7 @@ export async function POST(request: Request) {
     }
 
     // ── Verify payment succeeded with Stripe ────────────────────────────────
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    const paymentIntent = await getStripe().paymentIntents.retrieve(paymentIntentId);
 
     if (paymentIntent.status !== "succeeded") {
       return NextResponse.json(

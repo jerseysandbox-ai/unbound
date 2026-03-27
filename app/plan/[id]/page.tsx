@@ -15,6 +15,7 @@ import { useParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { GeneratedPlan, ScholarQuote } from "@/lib/agents";
+import FeedbackWidget from "@/components/FeedbackWidget";
 
 // ─── Content parsing helpers ─────────────────────────────────────────────────
 
@@ -326,6 +327,18 @@ export default function PlanPage() {
               </div>
             </div>
           )}
+
+          {/* Feedback widget */}
+          <FeedbackWidget
+            planId={id}
+            gradeLevel={plan.profile.gradeLevel ?? null}
+            subjects={
+              plan.agentOutputs
+                .filter((a) => !a.error)
+                .map((a) => a.subject)
+                .join(", ") || null
+            }
+          />
 
           {/* Footer CTA */}
           <div className="mt-10 text-center no-print">

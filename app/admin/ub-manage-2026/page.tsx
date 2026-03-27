@@ -11,6 +11,18 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ADMIN_EMAILS } from "@/lib/config";
+import changelog from "@/lib/changelog.json";
+
+interface FeedbackItem {
+  id: string;
+  user_id: string | null;
+  plan_id: string;
+  rating: "up" | "down";
+  comment: string | null;
+  grade_level: string | null;
+  subjects: string | null;
+  created_at: string;
+}
 
 interface Plan {
   id: string;
@@ -43,6 +55,9 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"users" | "feedback" | "versions">("users");
+  const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -60,6 +75,18 @@ export default function AdminDashboard() {
     setLoading(false);
   }, [router]);
 
+  const loadFeedback = useCallback(async () => {
+    setFeedbackLoading(true);
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("unbound_feedback")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    setFeedback(data || []);
+    setFeedbackLoading(false);
+  }, []);
+
   // Check auth and admin status on mount
   useEffect(() => {
     const check = async () => {
@@ -70,9 +97,10 @@ export default function AdminDashboard() {
         return;
       }
       loadData();
+      loadFeedback();
     };
     check();
-  }, [router, loadData]);
+  }, [router, loadData, loadFeedback]);
 
   async function deleteUser(userId: string, email: string) {
     if (!confirm(`Delete user ${email} and ALL their data? This cannot be undone.`)) return;
@@ -118,6 +146,33 @@ export default function AdminDashboard() {
     });
   }
 
+  const sanitizeCSV = (val: string | null | undefined): string => {
+    if (!val) return "";
+    const s = String(val);
+    return /^[=+\-@]/.test(s) ? `'${s}` : s;
+  };
+
+  function exportFeedbackCSV() {
+    const header = ["id", "plan_id", "rating", "comment", "grade_level", "subjects", "created_at"];
+    const rows = feedback.map((f) => [
+      f.id,
+      f.plan_id,
+      f.rating,
+      `"${sanitizeCSV(f.comment).replace(/"/g, '""')}"`,
+      sanitizeCSV(f.grade_level),
+      `"${sanitizeCSV(f.subjects).replace(/"/g, '""')}"`,
+      f.created_at,
+    ]);
+    const csv = [header.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `unbound-feedback-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   if (loading) {
     return (
       <main className="min-h-screen bg-[#faf9f6] flex items-center justify-center">
@@ -130,10 +185,27 @@ export default function AdminDashboard() {
     <main className="min-h-screen bg-[#faf9f6] px-4 py-8">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <span className="text-[#5b8f8a] font-bold text-xl">Unbound</span>
           <h1 className="text-2xl font-bold text-[#2d2d2d] mt-1">Admin Dashboard</h1>
           <p className="text-[#8a8580] text-sm mt-1">🔒 Internal use only</p>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 bg-[#e8e4e0] p-1 rounded-xl mb-6 w-fit">
+          {(["users", "feedback", "versions"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors capitalize ${
+                activeTab === tab
+                  ? "bg-white text-[#2d2d2d] shadow-sm"
+                  : "text-[#8a8580] hover:text-[#2d2d2d]"
+              }`}
+            >
+              {tab === "users" ? "Users" : tab === "feedback" ? "Feedback" : "Version History"}
+            </button>
+          ))}
         </div>
 
         {actionMsg && (
@@ -141,6 +213,9 @@ export default function AdminDashboard() {
             {actionMsg}
           </div>
         )}
+
+        {/* ─── Users tab ─── */}
+        {activeTab === "users" && <>
 
         {/* Stats */}
         {stats && (
@@ -241,6 +316,112 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
+
+        </>}
+
+        {/* ─── Feedback tab ─── */}
+        {activeTab === "feedback" && (
+          <>
+            {/* Summary stats */}
+            {(() => {
+              const upCount = feedback.filter((f) => f.rating === "up").length;
+              const downCount = feedback.filter((f) => f.rating === "down").length;
+              const total = upCount + downCount;
+              const ratio = total > 0 ? Math.round((upCount / total) * 100) : 0;
+              return (
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  {[
+                    { label: "👍 Helpful", value: upCount },
+                    { label: "👎 Not quite", value: downCount },
+                    { label: "Positive ratio", value: `${ratio}%` },
+                  ].map(({ label, value }) => (
+                    <div key={label} className="bg-white rounded-2xl border border-[#e8e4e0] p-5 text-center shadow-sm">
+                      <div className="text-3xl font-bold text-[#5b8f8a]">{value}</div>
+                      <div className="text-sm text-[#8a8580] mt-1">{label}</div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {/* Export + table */}
+            <div className="bg-white rounded-2xl border border-[#e8e4e0] shadow-sm overflow-hidden">
+              <div className="px-5 py-4 border-b border-[#e8e4e0] flex items-center justify-between">
+                <h2 className="font-semibold text-[#2d2d2d]">
+                  Recent feedback ({feedback.length})
+                </h2>
+                <button
+                  onClick={exportFeedbackCSV}
+                  className="text-sm bg-[#5b8f8a] text-white font-semibold px-4 py-1.5 rounded-lg hover:bg-[#3d6e69] transition-colors"
+                >
+                  Export CSV
+                </button>
+              </div>
+
+              {feedbackLoading ? (
+                <p className="text-[#8a8580] text-sm p-5">Loading feedback…</p>
+              ) : feedback.length === 0 ? (
+                <p className="text-[#8a8580] text-sm p-5">No feedback yet.</p>
+              ) : (
+                <div className="divide-y divide-[#f5f3f0]">
+                  {feedback.map((f) => (
+                    <div key={f.id} className="px-5 py-4 flex gap-4 items-start">
+                      <div className="text-2xl shrink-0">{f.rating === "up" ? "👍" : "👎"}</div>
+                      <div className="flex-1 min-w-0">
+                        {f.comment && (
+                          <p className="text-sm text-[#2d2d2d] mb-1">&ldquo;{f.comment}&rdquo;</p>
+                        )}
+                        <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-[#8a8580]">
+                          {f.grade_level && <span>Grade: {f.grade_level}</span>}
+                          {f.subjects && <span>Subjects: {f.subjects}</span>}
+                          <span>{fmt(f.created_at)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* ─── Version History tab ─── */}
+        {activeTab === "versions" && (
+          <div className="bg-white rounded-2xl border border-[#e8e4e0] shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-[#e8e4e0]">
+              <h2 className="font-semibold text-[#2d2d2d]">Version History</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#f0ece8] bg-[#faf9f6]">
+                    <th className="text-left px-5 py-3 text-[#5b8f8a] font-semibold w-28">Version</th>
+                    <th className="text-left px-4 py-3 text-[#5b8f8a] font-semibold w-36">Date</th>
+                    <th className="text-left px-4 py-3 text-[#5b8f8a] font-semibold">Summary</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {changelog.map((entry) => (
+                    <tr key={entry.version} className="border-b border-[#f5f3f0] hover:bg-[#faf9f6]">
+                      <td className="px-5 py-3">
+                        <span className="font-bold font-mono text-[#5b8f8a]">{entry.version}</span>
+                      </td>
+                      <td className="px-4 py-3 text-[#8a8580] whitespace-nowrap">
+                        {new Date(entry.date + "T00:00:00").toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-4 py-3 text-[#2d2d2d]">{entry.summary}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
       </div>
     </main>
   );

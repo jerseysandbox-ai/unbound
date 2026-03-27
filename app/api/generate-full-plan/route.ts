@@ -8,6 +8,8 @@
  * Body: { paymentIntentId: string, feedback?: string }
  */
 
+
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { kv } from "@vercel/kv";
@@ -15,9 +17,11 @@ import { generateFullPlan } from "@/lib/agents";
 import type { GeneratedOutline } from "@/lib/agents";
 import type { ChildProfile } from "@/app/profile/page";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover",
-});
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2026-02-25.clover",
+  });
+}
 
 // Max characters allowed in parent feedback before truncation — prevents
 // prompt injection and runaway token costs
@@ -130,7 +134,7 @@ export async function POST(request: Request) {
       }
     } else {
       // Paid plan: re-verify with Stripe before running expensive pipeline
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      const paymentIntent = await getStripe().paymentIntents.retrieve(paymentIntentId);
       if (paymentIntent.status !== "succeeded") {
         return NextResponse.json(
           { error: "Payment has not been completed" },
