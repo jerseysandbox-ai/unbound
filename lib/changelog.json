@@ -1,22 +1,57 @@
 [
   {
+    "version": "0.2.3",
+    "date": "2026-03-27",
+    "summary": "Version history tab added to admin dashboard. Changelog tracked in lib/changelog.json, auto-displayed in admin panel newest-first."
+  },
+  {
     "version": "0.2.2",
     "date": "2026-03-27",
-    "summary": "Security hardening: plan ownership verification, feedback spam prevention (unique constraint per user/plan), server-side comment length validation, CSV injection protection, HTML escaping in email notifications."
+    "summary": "Security hardening (Sentinel findings): plan ownership verification on feedback submit, spam prevention via unique constraint per user/plan, server-side comment length validation, CSV injection protection in admin export, HTML escaping in email notifications."
   },
   {
     "version": "0.2.1",
     "date": "2026-03-27",
-    "summary": "Early adopter feedback capture: thumbs up/down widget on plan page, feedback stored in Supabase, email notification to Nicole on each submission, admin Feedback tab with stats and CSV export."
+    "summary": "Early adopter feedback capture: thumbs up/down widget on plan page, feedback stored in Supabase (unbound_feedback table), Resend email notification to Nicole on each submission, admin Feedback tab with positive ratio stats and CSV export."
   },
   {
     "version": "0.2.0",
     "date": "2026-03-17",
-    "summary": "Security hardening release: middleware active, Turnstile server-side verification, IDOR fail-closed ownership checks, free plan race condition fix, admin email centralized in lib/config.ts, /api/admin/init-db gated, security headers added."
+    "summary": "Sentinel-verified security hardening: Next.js middleware enforcing auth on protected routes, Turnstile server-side verification on all forms, IDOR fail-closed ownership checks, atomic KV NX set pattern for free plan race condition, ADMIN_EMAILS centralized in lib/config.ts, /api/admin/init-db gated behind admin check, security headers added."
+  },
+  {
+    "version": "0.1.6",
+    "date": "2026-03-17",
+    "summary": "Domain switch to unboundlearner.com. GA4 (G-SEGN8M15H2) added. Dedicated Supabase project (lbtozmvkcksiiayuchse) provisioned. All secrets migrated to Doppler unbound project. Supabase Site URL updated."
+  },
+  {
+    "version": "0.1.5",
+    "date": "2026-03-16",
+    "summary": "Auth and user management: Supabase signup/login/password reset/email confirm flows, free first plan enforcement, $9 charge for plan 2+, session expired error handling fixed, payment flow fixed. Admin dashboard at /admin/ub-manage-2026 with user and plan management."
+  },
+  {
+    "version": "0.1.4",
+    "date": "2026-03-15",
+    "summary": "Nicole E2E feedback: materials section added to plan output, state standards paste-in field on profile form, sagacious scribe wait screen with character animation during generation, two separate PDFs (teacher guide + student packet), daily inspirational quote at top of each plan."
+  },
+  {
+    "version": "0.1.3",
+    "date": "2026-03-14",
+    "summary": "Privacy and compliance: privacy policy page at /privacy, consent checkbox on profile form, footer link added. Neurodivergent language removed from landing page meta description and all 7 agent prompts. Sage reframed as learning specialist."
+  },
+  {
+    "version": "0.1.2",
+    "date": "2026-03-13",
+    "summary": "Profile form redesign: diagnosis and age fields removed entirely; nickname + grade level dropdown only. Generic homeschool positioning replacing neurodivergent framing. PII reduction in Vercel KV (24h TTL, nickname + plan content only). Stripe separate account with restricted API keys scoped to Payment Intents and Checkout Sessions."
+  },
+  {
+    "version": "0.1.1",
+    "date": "2026-03-12",
+    "summary": "Cloudflare Turnstile bot protection added to all forms. unboundlearner.com and unbound-lake.vercel.app added as allowed domains. Stripe webhook verification added. Feedback field 500-char cap. Error handler body re-read fix."
   },
   {
     "version": "0.1.0",
     "date": "2026-03-10",
-    "summary": "Initial launch: two-phase plan generation (outline + full plan), Stripe payments, Supabase auth, free first plan, profile form, privacy policy, Cloudflare Turnstile, GA4 analytics."
+    "summary": "Initial launch: two-phase plan generation (outline ~15s + full plan ~75s), 7-specialist multi-agent team (Sage, Euler, Darwin, Paige, Atlas, Grounded, Studio), Stripe payments, Supabase auth, free first plan, profile form, privacy policy, GA4 analytics."
   }
 ]
