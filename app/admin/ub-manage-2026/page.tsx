@@ -11,6 +11,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ADMIN_EMAILS } from "@/lib/config";
+import changelog from "@/lib/changelog.json";
 
 interface FeedbackItem {
   id: string;
@@ -54,7 +55,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"users" | "feedback">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "feedback" | "versions">("users");
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
   const [feedbackLoading, setFeedbackLoading] = useState(false);
 
@@ -192,7 +193,7 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <div className="flex gap-1 bg-[#e8e4e0] p-1 rounded-xl mb-6 w-fit">
-          {(["users", "feedback"] as const).map((tab) => (
+          {(["users", "feedback", "versions"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -202,7 +203,7 @@ export default function AdminDashboard() {
                   : "text-[#8a8580] hover:text-[#2d2d2d]"
               }`}
             >
-              {tab === "users" ? "Users" : "Feedback"}
+              {tab === "users" ? "Users" : tab === "feedback" ? "Feedback" : "Version History"}
             </button>
           ))}
         </div>
@@ -382,6 +383,43 @@ export default function AdminDashboard() {
               )}
             </div>
           </>
+        )}
+
+        {/* ─── Version History tab ─── */}
+        {activeTab === "versions" && (
+          <div className="bg-white rounded-2xl border border-[#e8e4e0] shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-[#e8e4e0]">
+              <h2 className="font-semibold text-[#2d2d2d]">Version History</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#f0ece8] bg-[#faf9f6]">
+                    <th className="text-left px-5 py-3 text-[#5b8f8a] font-semibold w-28">Version</th>
+                    <th className="text-left px-4 py-3 text-[#5b8f8a] font-semibold w-36">Date</th>
+                    <th className="text-left px-4 py-3 text-[#5b8f8a] font-semibold">Summary</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {changelog.map((entry) => (
+                    <tr key={entry.version} className="border-b border-[#f5f3f0] hover:bg-[#faf9f6]">
+                      <td className="px-5 py-3">
+                        <span className="font-bold font-mono text-[#5b8f8a]">{entry.version}</span>
+                      </td>
+                      <td className="px-4 py-3 text-[#8a8580] whitespace-nowrap">
+                        {new Date(entry.date + "T00:00:00").toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-4 py-3 text-[#2d2d2d]">{entry.summary}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
 
       </div>

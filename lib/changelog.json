@@ -1,0 +1,22 @@
+[
+  {
+    "version": "0.2.2",
+    "date": "2026-03-27",
+    "summary": "Security hardening: plan ownership verification, feedback spam prevention (unique constraint per user/plan), server-side comment length validation, CSV injection protection, HTML escaping in email notifications."
+  },
+  {
+    "version": "0.2.1",
+    "date": "2026-03-27",
+    "summary": "Early adopter feedback capture: thumbs up/down widget on plan page, feedback stored in Supabase, email notification to Nicole on each submission, admin Feedback tab with stats and CSV export."
+  },
+  {
+    "version": "0.2.0",
+    "date": "2026-03-17",
+    "summary": "Security hardening release: middleware active, Turnstile server-side verification, IDOR fail-closed ownership checks, free plan race condition fix, admin email centralized in lib/config.ts, /api/admin/init-db gated, security headers added."
+  },
+  {
+    "version": "0.1.0",
+    "date": "2026-03-10",
+    "summary": "Initial launch: two-phase plan generation (outline + full plan), Stripe payments, Supabase auth, free first plan, profile form, privacy policy, Cloudflare Turnstile, GA4 analytics."
+  }
+]
