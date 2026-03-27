@@ -48,8 +48,13 @@ function sanitizeProfile(profile: ChildProfile): ChildProfile {
     learningChallenges: sanitizeField(profile.learningChallenges, 300),
     focusToday: sanitizeField(profile.focusToday, 300),
     stateStandards: sanitizeField(profile.stateStandards, 300),
+    homeState: sanitizeField(profile.homeState, 50),
     materialsNotes: sanitizeField(profile.materialsNotes, 300),
     learningStyleNotes: sanitizeField(profile.learningStyleNotes, 300),
+    subjectGoals: (profile.subjectGoals ?? []).map((g) => ({
+      subject: sanitizeField(g.subject, 50),
+      focus: sanitizeField(g.focus, 200),
+    })),
   };
 }
 

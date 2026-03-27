@@ -55,9 +55,14 @@ export default function BookCompanionPage() {
         <Link href="/" className="text-[#1a5c5a] font-semibold text-lg">
           Unbound
         </Link>
-        <Link href="/book-recommendations" className="text-sm text-[#1a5c5a] hover:underline">
-          Book Recommendations
-        </Link>
+        <div className="flex items-center gap-4 text-sm">
+          <Link href="/book-recommendations" className="text-[#1a5c5a] hover:underline hidden sm:inline">
+            Book Recommendations
+          </Link>
+          <Link href="/field-trips" className="text-[#1a5c5a] hover:underline">
+            Field Trips
+          </Link>
+        </div>
       </nav>
 
       <div className="max-w-xl mx-auto px-6 py-12">

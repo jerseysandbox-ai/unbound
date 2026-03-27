@@ -11,6 +11,11 @@ const TurnstileWidget = dynamic(() => import("@/components/TurnstileWidget"), {
   ssr: false,
 });
 
+export interface SubjectGoal {
+  subject: string;
+  focus: string;
+}
+
 export interface ChildProfile {
   // Layer 1 - Saved Learner Profile (persisted in localStorage)
   childName: string;
@@ -21,17 +26,20 @@ export interface ChildProfile {
   materialsAvailable?: string[]; // checkboxes of available materials
   materialsNotes?: string; // anything to avoid or extra info
   stateStandards?: string; // optional paste-in standards
+  homeState?: string; // selected US state for standards alignment
+  useStateStandards?: boolean; // whether to align to state standards
 
   // Layer 2 - Today's Session (always fresh)
   sessionLength: string;
   focusToday: string;
   energyCheck: string;
+  subjectGoals?: SubjectGoal[]; // session-specific subject goals
 }
 
 // The subset stored in localStorage (Layer 1 only)
 type SavedProfile = Pick<
   ChildProfile,
-  "childName" | "gradeLevel" | "interests" | "learningChallenges" | "learningStyleNotes" | "materialsAvailable" | "materialsNotes" | "stateStandards"
+  "childName" | "gradeLevel" | "interests" | "learningChallenges" | "learningStyleNotes" | "materialsAvailable" | "materialsNotes" | "stateStandards" | "homeState" | "useStateStandards"
 >;
 
 // Key is namespaced by user ID so profiles never bleed between accounts
@@ -72,6 +80,30 @@ const ENERGY_OPTIONS = [
   { value: "hyper", label: "Hyper - need movement breaks" },
 ];
 
+const US_STATES = [
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+  "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+  "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+  "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi",
+  "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
+  "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma",
+  "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+  "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+  "West Virginia", "Wisconsin", "Wyoming",
+];
+
+const SUBJECT_OPTIONS = [
+  "Math",
+  "Reading & Language Arts",
+  "Science",
+  "Social Studies",
+  "History",
+  "Art",
+  "Music",
+  "PE / Movement",
+  "Other",
+];
+
 const GRADE_OPTIONS = [
   { value: "K", label: "Kindergarten" },
   { value: "1", label: "1st grade" },
@@ -107,10 +139,17 @@ export default function ProfilePage() {
     materialsAvailable: [],
     materialsNotes: "",
     stateStandards: "",
+    homeState: "",
+    useStateStandards: false,
     sessionLength: "1hour",
     focusToday: "",
     energyCheck: "ready",
+    subjectGoals: [{ subject: "Math", focus: "" }],
   });
+
+  const [subjectGoals, setSubjectGoals] = useState<SubjectGoal[]>([
+    { subject: "Math", focus: "" },
+  ]);
 
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [consentChecked, setConsentChecked] = useState(false);
@@ -153,6 +192,8 @@ export default function ProfilePage() {
           materialsAvailable: saved.materialsAvailable ?? prev.materialsAvailable,
           materialsNotes: saved.materialsNotes ?? prev.materialsNotes,
           stateStandards: saved.stateStandards ?? prev.stateStandards,
+          homeState: saved.homeState ?? prev.homeState,
+          useStateStandards: saved.useStateStandards ?? prev.useStateStandards,
         }));
       }
     });
@@ -224,11 +265,19 @@ export default function ProfilePage() {
           materialsAvailable: form.materialsAvailable,
           materialsNotes: form.materialsNotes,
           stateStandards: form.stateStandards,
+          homeState: form.homeState,
+          useStateStandards: form.useStateStandards,
         });
       }
 
+      // Merge session-specific subjectGoals into form before storing
+      const fullForm = {
+        ...form,
+        subjectGoals: subjectGoals.filter((g) => g.subject.trim()),
+      };
+
       // Store full profile in sessionStorage for payment flow
-      sessionStorage.setItem("unbound_profile", JSON.stringify(form));
+      sessionStorage.setItem("unbound_profile", JSON.stringify(fullForm));
       sessionStorage.setItem("unbound_turnstile", turnstileToken);
 
       // Check if this is the user's first free plan
@@ -480,6 +529,122 @@ export default function ProfilePage() {
                 </Field>
               </div>
             )}
+          </div>
+
+          {/* ── Learning Standards ── */}
+          <div className="border border-[#e8e4e0] rounded-xl p-4 space-y-4">
+            <p className="text-sm font-semibold text-[#2d2d2d]">Learning Standards</p>
+
+            {/* State standards checkbox */}
+            <div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.useStateStandards ?? false}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, useStateStandards: e.target.checked }))
+                  }
+                  className="h-4 w-4 rounded border-[#e0dbd5] accent-[#5b8f8a] cursor-pointer"
+                />
+                <span className="text-sm text-[#2d2d2d]">
+                  Align to my state&apos;s academic standards
+                </span>
+              </label>
+              {form.useStateStandards && (
+                <div className="mt-2">
+                  <select
+                    value={form.homeState ?? ""}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, homeState: e.target.value }))
+                    }
+                    className={inputClass}
+                  >
+                    <option value="">Select your state...</option>
+                    {US_STATES.map((state) => (
+                      <option key={state} value={state}>
+                        {state}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-[#8a8580] mt-1">
+                    Your state preference will be saved to your profile.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Subject goals */}
+            <div>
+              <p className="text-sm font-medium text-[#2d2d2d] mb-1">
+                Subject goals for today
+              </p>
+              <p className="text-xs text-[#8a8580] mb-3">
+                Optional - tell us exactly what to work on for each subject
+              </p>
+              <div className="space-y-3">
+                {subjectGoals.map((goal, idx) => (
+                  <div key={idx} className="flex gap-2 items-start">
+                    <div className="flex-1 space-y-1.5">
+                      <select
+                        value={goal.subject}
+                        onChange={(e) => {
+                          const updated = [...subjectGoals];
+                          updated[idx] = { ...updated[idx], subject: e.target.value };
+                          setSubjectGoals(updated);
+                        }}
+                        className={inputClass}
+                      >
+                        {SUBJECT_OPTIONS.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="text"
+                        value={goal.focus}
+                        onChange={(e) => {
+                          const updated = [...subjectGoals];
+                          updated[idx] = { ...updated[idx], focus: e.target.value };
+                          setSubjectGoals(updated);
+                        }}
+                        placeholder={
+                          goal.subject === "Math"
+                            ? "e.g. Fractions - adding unlike denominators"
+                            : goal.subject === "Reading & Language Arts"
+                            ? "e.g. Chapter 3 of Charlotte's Web"
+                            : goal.subject === "History"
+                            ? "e.g. American Revolution"
+                            : "What specifically should we work on?"
+                        }
+                        className={inputClass}
+                      />
+                    </div>
+                    {subjectGoals.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setSubjectGoals(subjectGoals.filter((_, i) => i !== idx))}
+                        className="mt-1 text-[#8a8580] hover:text-red-500 text-lg leading-none px-1"
+                        aria-label="Remove subject"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {subjectGoals.length < 4 && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSubjectGoals([...subjectGoals, { subject: "Math", focus: "" }])
+                  }
+                  className="mt-2 text-sm text-[#5b8f8a] hover:text-[#3d6e69] font-medium"
+                >
+                  + Add another subject
+                </button>
+              )}
+            </div>
           </div>
 
           {/* ── Layer 2: Today's Session ── */}

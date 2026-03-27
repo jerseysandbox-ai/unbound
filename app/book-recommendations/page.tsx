@@ -70,9 +70,14 @@ export default function BookRecommendationsPage() {
       {/* Nav */}
       <nav className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
         <Link href="/" className="text-[#1a5c5a] font-semibold text-lg">Unbound</Link>
-        <Link href="/book-companion" className="text-sm text-[#1a5c5a] hover:underline">
-          Book Companion
-        </Link>
+        <div className="flex items-center gap-4 text-sm">
+          <Link href="/book-companion" className="text-[#1a5c5a] hover:underline hidden sm:inline">
+            Book Companion
+          </Link>
+          <Link href="/field-trips" className="text-[#1a5c5a] hover:underline">
+            Field Trips
+          </Link>
+        </div>
       </nav>
 
       <div className="max-w-2xl mx-auto px-6 py-12">
