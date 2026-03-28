@@ -21,6 +21,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import type { ChildProfile } from "@/app/profile/page";
+import { getStateFramework, getStandardsForLesson } from "./standards-data";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -171,12 +172,46 @@ function formatProfile(profile: ChildProfile): string {
     lines.push(`Materials: No printer assumed. Use only basic household items (paper, pencil, everyday objects). Do not require any materials purchase. No printed worksheets.`);
   }
 
-  // State standards alignment
+  // State standards alignment — cite real standard codes
   if (profile.useStateStandards && profile.homeState?.trim()) {
-    const gradeLabelForState = gradeLabels[profile.gradeLevel] || profile.gradeLevel;
-    lines.push(`State Standards: Please align activities to ${profile.homeState} academic standards for ${gradeLabelForState}.`);
-  } else if (profile.stateStandards?.trim()) {
-    lines.push(`State Standards to Align:\n${profile.stateStandards}`);
+    const gradeNum = parseInt(profile.gradeLevel, 10);
+    const framework = getStateFramework(profile.homeState);
+
+    if (!isNaN(gradeNum) && gradeNum >= 5 && gradeNum <= 8) {
+      // Determine which subjects to look up standards for
+      const subjects: { subject: string; topic?: string }[] = (profile.subjectGoals ?? [])
+        .filter((g) => g.subject?.trim())
+        .map((g) => ({ subject: g.subject, topic: g.focus || undefined }));
+
+      // Default subjects if none specified
+      if (subjects.length === 0) {
+        subjects.push({ subject: "Math" });
+        subjects.push({ subject: "Language Arts" });
+        subjects.push({ subject: "Science" });
+      }
+
+      const standardsLines: string[] = [];
+      for (const { subject, topic } of subjects) {
+        const result = getStandardsForLesson(profile.homeState, gradeNum, subject, topic || undefined);
+        if (result.standards.length > 0) {
+          const label = `Standards for ${subject} (${profile.homeState} - ${result.framework})`;
+          const codes = result.standards.map((s) => `- ${s.code}: ${s.description}`).join("\n");
+          standardsLines.push(`${label}:\n${codes}`);
+        }
+      }
+
+      if (standardsLines.length > 0) {
+        lines.push(standardsLines.join("\n\n"));
+        lines.push("Please reference these standard codes in the lesson plan when teaching each subject.");
+        if (framework.note) {
+          lines.push(`Note: ${framework.note}`);
+        }
+      }
+    } else {
+      // Grade outside 5-8 range — fall back to general alignment request
+      const gradeLabelForState = gradeLabels[profile.gradeLevel] || profile.gradeLevel;
+      lines.push(`State Standards: Please align activities to ${profile.homeState} academic standards for ${gradeLabelForState}. (Specific standard codes are available for grades 5-8.)`);
+    }
   }
 
   // Session-specific subject goals

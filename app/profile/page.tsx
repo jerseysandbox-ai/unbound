@@ -513,45 +513,41 @@ export default function ProfilePage() {
                   />
                 </div>
 
-                {/* State standards - optional */}
-                <Field
-                  label="State learning standards"
-                  hint="Optional - paste any standards you want today's plan to align with"
-                >
-                  <textarea
-                    name="stateStandards"
-                    value={form.stateStandards}
-                    onChange={handleChange}
-                    placeholder="e.g. CCSS.MATH.CONTENT.4.OA.A.1: Interpret a multiplication equation as a comparison"
-                    rows={3}
-                    className={textareaClass}
-                  />
-                </Field>
               </div>
             )}
           </div>
 
-          {/* ── Learning Standards ── */}
+          {/* ── Academic Standards & Subject Goals ── */}
           <div className="border border-[#e8e4e0] rounded-xl p-4 space-y-4">
-            <p className="text-sm font-semibold text-[#2d2d2d]">Learning Standards</p>
-
-            {/* State standards checkbox */}
-            <div>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form.useStateStandards ?? false}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, useStateStandards: e.target.checked }))
-                  }
-                  className="h-4 w-4 rounded border-[#e0dbd5] accent-[#5b8f8a] cursor-pointer"
-                />
-                <span className="text-sm text-[#2d2d2d]">
-                  Align to my state&apos;s academic standards
+            {/* Academic Standards Alignment (optional, expandable) */}
+            <div className="border border-[#e8e4e0] rounded-lg bg-[#faf9f6]">
+              <button
+                type="button"
+                onClick={() =>
+                  setForm((prev) => ({
+                    ...prev,
+                    useStateStandards: !prev.useStateStandards,
+                    // Clear homeState when toggling off
+                    ...(!prev.useStateStandards ? {} : { homeState: "" }),
+                  }))
+                }
+                className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[#f4f1ee] rounded-lg transition-colors"
+              >
+                <div>
+                  <span className="text-sm font-semibold text-[#2d2d2d]">
+                    Academic Standards Alignment
+                  </span>
+                  <span className="ml-2 text-xs text-[#8a8580] font-normal">(optional)</span>
+                </div>
+                <span className="text-[#8a8580] text-sm">
+                  {form.useStateStandards ? "▲" : "▼"}
                 </span>
-              </label>
+              </button>
               {form.useStateStandards && (
-                <div className="mt-2">
+                <div className="px-4 pb-4 space-y-3">
+                  <p className="text-xs text-[#8a8580]">
+                    When enabled, your lesson plans will cite specific standard codes from your state&apos;s framework (CCSS, TEKS, or SOL).
+                  </p>
                   <select
                     value={form.homeState ?? ""}
                     onChange={(e) =>
@@ -566,8 +562,8 @@ export default function ProfilePage() {
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-[#8a8580] mt-1">
-                    Your state preference will be saved to your profile.
+                  <p className="text-xs text-[#8a8580]">
+                    Most Common Core states (41+ states) are fully supported. Texas (TEKS) and Virginia (SOL) are partially supported. Standards data covers grades 5-8.
                   </p>
                 </div>
               )}
