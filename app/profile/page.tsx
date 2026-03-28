@@ -101,6 +101,8 @@ const SUBJECT_OPTIONS = [
   "Art",
   "Music",
   "PE / Movement",
+  "Social Emotional Learning",
+  "Executive Functioning",
   "Other",
 ];
 
