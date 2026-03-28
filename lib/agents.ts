@@ -123,6 +123,7 @@ function formatProfile(profile: ChildProfile): string {
     "1hour": "1 hour",
     "2hours": "2 hours",
     "halfday": "Half day (3-4 hours)",
+    "fullday": "Full day (5-6 hours)",
   };
 
   const gradeLabels: Record<string, string> = {

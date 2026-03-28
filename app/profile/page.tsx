@@ -71,6 +71,7 @@ const SESSION_OPTIONS = [
   { value: "1hour", label: "1 hour" },
   { value: "2hours", label: "2 hours" },
   { value: "halfday", label: "Half day (3-4 hours)" },
+  { value: "fullday", label: "Full day (5-6 hours)" },
 ];
 
 const ENERGY_OPTIONS = [
@@ -631,7 +632,7 @@ export default function ProfilePage() {
                   </div>
                 ))}
               </div>
-              {subjectGoals.length < 4 && (
+              {(
                 <button
                   type="button"
                   onClick={() =>
