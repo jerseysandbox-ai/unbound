@@ -21,31 +21,31 @@ export async function GET(
   }
 
   try {
-    // Get the authenticated user (optional — public plans may be accessible)
+    // Require authentication — no anonymous access to stored plans
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const adminSupabase = createAdminClient();
 
-    // Look up plan by kv_session_id
+    // Look up plan by kv_session_id AND enforce ownership in the query
     const { data: plan, error } = await adminSupabase
       .from("unbound_plans")
-      .select("*")
+      .select("kv_session_id, teacher_plan, student_plan, subjects, child_nickname, grade_level, created_at, user_id")
       .eq("kv_session_id", id)
+      .eq("user_id", user.id)
       .single();
 
     if (error || !plan) {
-      return NextResponse.json({ error: "Plan not found" }, { status: 404 });
-    }
-
-    // Enforce ownership — only the plan owner can view
-    if (user && plan.user_id !== user.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
     // Reconstruct a GeneratedPlan-compatible response
     const reconstructed = {
       plan: plan.teacher_plan || "",
+      studentPlan: plan.student_plan || "",
       childBrief: "",
       agentOutputs: (plan.subjects ?? "")
         .split(",")

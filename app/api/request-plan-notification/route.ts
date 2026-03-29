@@ -35,6 +35,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Verify session belongs to the requesting user
+    const sessionOwner = await kv.get(`free_user:${sessionId}`);
+    if (sessionOwner !== user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     // Store notification request in KV
     await kv.set(`notify:${sessionId}`, { email }, { ex: NOTIFY_TTL });
 

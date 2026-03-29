@@ -16,6 +16,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { GeneratedPlan, ScholarQuote } from "@/lib/agents";
 import FeedbackWidget from "@/components/FeedbackWidget";
+import { createClient } from "@/lib/supabase/client";
 
 // ─── Content parsing helpers ─────────────────────────────────────────────────
 
@@ -144,6 +145,14 @@ export default function PlanPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"teacher" | "student">("teacher");
+  const [isAuthed, setIsAuthed] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setIsAuthed(!!data.user);
+    });
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -242,7 +251,15 @@ export default function PlanPage() {
                 {plan.profile.childName}&apos;s Plan - {date}
               </p>
             </div>
-            <div className="flex gap-2 shrink-0">
+            <div className="flex gap-2 items-center shrink-0">
+              {isAuthed && (
+                <a
+                  href="/account"
+                  className="text-white/80 hover:text-white text-sm font-medium underline underline-offset-2 mr-1"
+                >
+                  My Plans
+                </a>
+              )}
               <a
                 href={`/api/download-pdf/${id}?type=teacher`}
                 download
