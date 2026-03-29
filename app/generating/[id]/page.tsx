@@ -281,7 +281,15 @@ export default function GeneratingPage() {
 
     poll();
     const interval = setInterval(poll, 2000);
-    return () => clearInterval(interval);
+
+    // Hard frontend timeout — if Vercel hard-kills the function (5min maxDuration),
+    // the catch block never runs and KV stays stale. After 6 minutes we give up and
+    // show the error state so the user isn't stuck polling forever.
+    const hardTimeout = setTimeout(() => {
+      setError("Your plan is taking too long and may have timed out. Please try again. Your payment was not affected.");
+    }, 360_000); // 6 minutes
+
+    return () => { clearInterval(interval); clearTimeout(hardTimeout); };
   }, [id, phase, router]);
 
   // Display message: prefer API message, else rotate

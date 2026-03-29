@@ -1,5 +1,10 @@
 [
   {
+    "version": "0.3.8",
+    "date": "2026-03-29",
+    "summary": "Fix 13-minute hang: Vercel hard-kill leaves KV stale \u2014 frontend now hard-times out at 6 minutes and shows error state. Failure email sent to notify-opted users if generation errors or times out. Root cause: Vercel kills function at maxDuration without running catch block; 2min per-call timeout (v0.3.7) + 6min frontend timeout are the two-layer defense."
+  },
+  {
     "version": "0.3.7",
     "date": "2026-03-29",
     "summary": "Add 2-minute per-call timeout to all Claude API calls \u2014 prevents hung requests from burning tokens indefinitely. Add \"Taking longer than expected\" UI on generating page after 4 minutes with a Start Over link."

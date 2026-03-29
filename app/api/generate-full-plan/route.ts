@@ -317,6 +317,33 @@ export async function POST(request: Request) {
           { phase: "error", progress: 0, message: "Something went wrong. Please contact support." },
           { ex: KV_TTL }
         );
+      } catch { /* best-effort */ }
+
+      // If the user opted in for email notification, send them a failure email
+      // so they know to try again rather than waiting indefinitely.
+      try {
+        const notifyData = await kv.get<{ email: string }>(`notify:${paymentIntentId}`);
+        if (notifyData?.email) {
+          await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+            },
+            body: JSON.stringify({
+              from: "Unbound <hello@unboundlearner.com>",
+              to: notifyData.email,
+              subject: "Your Unbound plan ran into a problem",
+              html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#2d2d2d;">
+                <h2 style="color:#5b8f8a;">Something went wrong</h2>
+                <p>We hit an unexpected error while generating your plan. Your payment was not affected.</p>
+                <p>Please <a href="https://unboundlearner.com/profile" style="color:#5b8f8a;">try again</a> and it should work. If the problem continues, reply to this email and we will sort it out.</p>
+                <p style="color:#8a8580;font-size:12px;">Reference ID: ${paymentIntentId}</p>
+              </div>`,
+              text: `Something went wrong generating your Unbound plan. Your payment was not affected. Please try again at https://unboundlearner.com/profile. Reference ID: ${paymentIntentId}`,
+            }),
+          });
+        }
       } catch { /* best-effort — don't mask the original error */ }
     }
 
