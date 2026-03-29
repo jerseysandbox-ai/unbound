@@ -90,7 +90,8 @@ export async function POST(req: NextRequest) {
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2d2d2d;">
         <h2 style="color: #5b8f8a; margin-bottom: 16px;">New Unbound Feedback</h2>
         <table style="width: 100%; border-collapse: collapse;">
-          <tr><td style="padding: 8px 0; font-weight: 600; color: #5b8f8a; width: 120px;">Rating</td><td style="padding: 8px 0;">${ratingLabel}</td></tr>
+          <tr><td style="padding: 8px 0; font-weight: 600; color: #5b8f8a; width: 120px;">From</td><td style="padding: 8px 0;">${escapeHtml(user.email || "Unknown")}</td></tr>
+          <tr><td style="padding: 8px 0; font-weight: 600; color: #5b8f8a;">Rating</td><td style="padding: 8px 0;">${ratingLabel}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 600; color: #5b8f8a;">Comment</td><td style="padding: 8px 0;">${safeComment}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 600; color: #5b8f8a;">Grade level</td><td style="padding: 8px 0;">${safeGradeLevel}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 600; color: #5b8f8a;">Subjects</td><td style="padding: 8px 0;">${safeSubjects}</td></tr>
@@ -100,6 +101,7 @@ export async function POST(req: NextRequest) {
     `;
 
     const plainText = [
+      `From: ${user.email || "Unknown"}`,
       `Rating: ${ratingLabel}`,
       `Comment: ${commentText}`,
       `Grade level: ${gradeLevel || "Not specified"}`,

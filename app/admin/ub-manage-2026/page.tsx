@@ -22,6 +22,7 @@ interface FeedbackItem {
   grade_level: string | null;
   subjects: string | null;
   created_at: string;
+  unbound_users?: { email: string | null } | null;
 }
 
 interface Plan {
@@ -80,7 +81,7 @@ export default function AdminDashboard() {
     const supabase = createClient();
     const { data } = await supabase
       .from("unbound_feedback")
-      .select("*")
+      .select("*, unbound_users(email)")
       .order("created_at", { ascending: false })
       .limit(200);
     setFeedback(data || []);
@@ -153,9 +154,10 @@ export default function AdminDashboard() {
   };
 
   function exportFeedbackCSV() {
-    const header = ["id", "plan_id", "rating", "comment", "grade_level", "subjects", "created_at"];
+    const header = ["id", "user_email", "plan_id", "rating", "comment", "grade_level", "subjects", "created_at"];
     const rows = feedback.map((f) => [
       f.id,
+      sanitizeCSV(f.unbound_users?.email),
       f.plan_id,
       f.rating,
       `"${sanitizeCSV(f.comment).replace(/"/g, '""')}"`,
@@ -372,6 +374,7 @@ export default function AdminDashboard() {
                           <p className="text-sm text-[#2d2d2d] mb-1">&ldquo;{f.comment}&rdquo;</p>
                         )}
                         <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-[#8a8580]">
+                          {f.unbound_users?.email && <span className="font-medium text-[#5b8f8a]">{f.unbound_users.email}</span>}
                           {f.grade_level && <span>Grade: {f.grade_level}</span>}
                           {f.subjects && <span>Subjects: {f.subjects}</span>}
                           <span>{fmt(f.created_at)}</span>
