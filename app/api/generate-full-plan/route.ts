@@ -257,13 +257,7 @@ export async function POST(request: Request) {
     try {
       const notifyData = await kv.get<{ email: string }>(`notify:${paymentIntentId}`);
       if (notifyData?.email) {
-        const { Resend } = await import("resend");
-        const resend = new Resend(process.env.RESEND_API_KEY);
-        await resend.emails.send({
-          from: "Unbound <hello@unboundlearner.com>",
-          to: notifyData.email,
-          subject: "Your Unbound plan is ready! 🎉",
-          html: `
+        const htmlBody = `
             <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2d2d2d;">
               <h2 style="color: #5b8f8a;">Your lesson plan is ready! 🎉</h2>
               <p>Hi there!</p>
@@ -283,7 +277,21 @@ export async function POST(request: Request) {
               </p>
               <p style="color: #8a8580; font-size: 14px;">— The Unbound Team</p>
             </div>
-          `,
+          `;
+        const plainText = `Your lesson plan is ready!\n\nView it at: https://unboundlearner.com/plan/${paymentIntentId}\n\nOr visit your account: https://unboundlearner.com/account`;
+        await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          },
+          body: JSON.stringify({
+            from: "Unbound <hello@unboundlearner.com>",
+            to: notifyData.email,
+            subject: "Your Unbound plan is ready! 🎉",
+            html: htmlBody,
+            text: plainText,
+          }),
         });
         // Clean up notification key
         await kv.del(`notify:${paymentIntentId}`);
