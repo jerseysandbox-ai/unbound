@@ -136,7 +136,7 @@ export default function AccountPage() {
                       {plan.child_nickname ?? "Unnamed child"}
                       {plan.grade_level ? (
                         <span className="text-[#5b8f8a] font-normal ml-2 text-sm">
-                          {plan.grade_level}
+                          Grade {plan.grade_level}
                         </span>
                       ) : null}
                     </h3>

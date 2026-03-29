@@ -1,5 +1,10 @@
 [
   {
+    "version": "0.4.1",
+    "date": "2026-03-29",
+    "summary": "Fix account page showing raw grade number (e.g. \"4\") \u2014 now displays as \"Grade 4\"."
+  },
+  {
     "version": "0.4.0",
     "date": "2026-03-29",
     "summary": "Fix Planner adding unsolicited subjects (SEL, Science Connection etc.) when parent specifies specific subjects \u2014 now strictly respects subjectGoals selection. Fix outline regeneration to redirect to scribe waiting screen instead of spinning in place on the outline page."
