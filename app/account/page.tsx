@@ -156,13 +156,7 @@ export default function AccountPage() {
                       >
                         View Plan
                       </a>
-                      <a
-                        href={`/api/download-pdf-stored/${plan.kv_session_id}`}
-                        download
-                        className="border border-[#5b8f8a] text-[#5b8f8a] text-sm font-semibold px-3 py-2 rounded-lg hover:bg-[#e8f4f3] transition-colors whitespace-nowrap"
-                      >
-                        Download PDF
-                      </a>
+
                     </div>
                   )}
                 </div>

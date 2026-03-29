@@ -251,6 +251,11 @@ export default function GeneratingPage() {
 
         const data = await res.json();
 
+        // When waiting for full plan, ignore stale outline_ready status from the
+        // previous phase — only update progress/message once full generation has started
+        const isFullPhaseStatus = data.phase === "generating_full" || data.phase === "complete" || data.phase === "error";
+        if (phase === "full" && !isFullPhaseStatus) return;
+
         setProgress(data.progress ?? 0);
         if (data.message) setApiMessage(data.message);
 
