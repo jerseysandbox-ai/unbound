@@ -150,13 +150,24 @@ export default function PlanPage() {
 
     async function fetchPlan() {
       try {
+        // Try KV first via get-plan API
         const res = await fetch(`/api/get-plan/${id}`);
-        if (!res.ok) {
+        if (res.ok) {
           const data = await res.json();
-          throw new Error(data.error || "Plan not found");
+          setPlan(data);
+          return;
         }
-        const data = await res.json();
-        setPlan(data);
+
+        // KV expired — try Supabase fallback
+        const fallbackRes = await fetch(`/api/get-plan-fallback/${id}`);
+        if (fallbackRes.ok) {
+          const data = await fallbackRes.json();
+          setPlan(data);
+          return;
+        }
+
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Plan not found");
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to load plan");
       } finally {

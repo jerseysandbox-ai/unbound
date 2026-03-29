@@ -144,6 +144,9 @@ export default function HomePage() {
             userEmail ? (
               <>
                 <span className="text-[#8a8580] hidden sm:inline">{userEmail}</span>
+                <Link href="/account" className="text-[#5b8f8a] font-medium hover:underline">
+                  My Plans
+                </Link>
                 <button
                   onClick={handleSignOut}
                   className="text-[#5b8f8a] font-medium hover:underline"

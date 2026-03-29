@@ -1,5 +1,10 @@
 [
   {
+    "version": "0.3.3",
+    "date": "2026-03-29",
+    "summary": "Account page with full plan history (view + download past plans). Plan content now persisted to Supabase (no more 24h expiry). Email notification opt-in during generation — get emailed when your plan is ready with a direct link."
+  },
+  {
     "version": "0.3.2",
     "date": "2026-03-29",
     "summary": "Fix feedback submission 403 error \u2014 planId is a KV session ID not a Supabase UUID; ownership enforced via user_id on insert instead. KV credentials fixed in Vercel production and Doppler."

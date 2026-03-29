@@ -10,6 +10,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 
 // ─── Status messages per phase ───────────────────────────────────────────────
 
@@ -176,6 +177,22 @@ export default function GeneratingPage() {
   const [elapsed, setElapsed] = useState(0); // seconds since generation started
   const generateCalled = useRef(false);
 
+  // Email notification opt-in state
+  const [notifyEmail, setNotifyEmail] = useState("");
+  const [notifyStatus, setNotifyStatus] = useState<"idle" | "sent" | "error">("idle");
+  const [isDone, setIsDone] = useState(false);
+
+  // Pre-fill email from auth
+  useEffect(() => {
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user?.email) setNotifyEmail(data.user.email);
+    });
+  }, []);
+
   // Rotate through status messages every 4 seconds
   useEffect(() => {
     const timer = setInterval(() => {
@@ -240,10 +257,12 @@ export default function GeneratingPage() {
         }
 
         if (phase === "outline" && data.phase === "outline_ready") {
+          setIsDone(true);
           router.replace(`/outline/${id}`);
           return;
         }
         if (phase === "full" && data.phase === "complete") {
+          setIsDone(true);
           router.replace(`/plan/${id}`);
           return;
         }
@@ -329,6 +348,58 @@ export default function GeneratingPage() {
               : `${Math.floor(elapsed / 60)}m ${elapsed % 60}s elapsed — wrapping up the final touches...`}
           </p>
         </div>
+
+        {/* Email notification opt-in — only show during full plan generation while still running */}
+        {phase === "full" && !isDone && (
+          <div className="mt-8 w-full bg-white rounded-2xl border border-[#e8e4e0] p-5 text-left">
+            <p className="text-sm font-semibold text-[#2d2d2d] mb-1">
+              📬 Email me when my plan is ready
+            </p>
+            <p className="text-xs text-[#8a8580] mb-3">
+              Close this tab and we&apos;ll send you a link when it&apos;s done.
+            </p>
+            {notifyStatus === "sent" ? (
+              <p className="text-sm text-[#5b8f8a] font-medium">
+                ✓ Got it! We&apos;ll email you at <strong>{notifyEmail}</strong> when it&apos;s ready.
+              </p>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  value={notifyEmail}
+                  onChange={(e) => setNotifyEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="flex-1 text-sm border border-[#e8e4e0] rounded-lg px-3 py-2 focus:outline-none focus:border-[#5b8f8a] text-[#2d2d2d]"
+                />
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch("/api/request-plan-notification", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ sessionId: id, email: notifyEmail }),
+                      });
+                      if (res.ok) {
+                        setNotifyStatus("sent");
+                      } else {
+                        setNotifyStatus("error");
+                      }
+                    } catch {
+                      setNotifyStatus("error");
+                    }
+                  }}
+                  disabled={!notifyEmail}
+                  className="bg-[#5b8f8a] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#3d6e69] transition-colors disabled:opacity-50 whitespace-nowrap"
+                >
+                  Notify me
+                </button>
+              </div>
+            )}
+            {notifyStatus === "error" && (
+              <p className="text-xs text-red-500 mt-1">Something went wrong. Please try again.</p>
+            )}
+          </div>
+        )}
       </div>
 
       <style>{`
