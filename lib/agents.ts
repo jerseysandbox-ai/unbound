@@ -277,7 +277,10 @@ Given a child's profile and learner brief, output a JSON array of subject outlin
 - summary: 2-3 sentences describing what activity will happen today, tailored to this specific child's interests and needs
 - estimatedMinutes: realistic time estimate as a number (e.g. 20, 30, 45)
 
-Adjust the number of subjects and times to fit the session length. For a 30-minute session, include 1-2 subjects prioritized by parent focus. For a half-day, include all 7.
+CRITICAL RULES:
+- If the parent has specified subject goals (subjectGoals), include ONLY those subjects. Do not add extras like SEL, Science Connection, or any subject the parent did not list. Respect their selection exactly.
+- If no subject goals are specified, adjust the number of subjects to fit the session length. For a 30-minute session, 1-2 subjects. For a half-day, up to 7.
+- Never add subjects "to round out the day" or for any other reason if the parent already specified what they want.
 
 If parent feedback or subject tweaks are provided, incorporate them fully into the outline.
 

@@ -109,8 +109,8 @@ export default function OutlinePage() {
   }
 
   // Regenerate outline with current tweaks and global feedback.
-  // Profile is NOT read from sessionStorage — the server retrieves it from KV
-  // using the paymentIntentId. This fixes the "Session expired" bug.
+  // Fires the API call in the background and immediately redirects to the scribe
+  // waiting screen — consistent with first-time outline generation UX.
   const handleRegenerate = useCallback(async () => {
     if (!outline) return;
     setRegenerating(true);
@@ -121,38 +121,23 @@ export default function OutlinePage() {
       .filter(([, feedback]) => feedback.trim())
       .map(([subject, feedback]) => ({ subject, feedback }));
 
-    try {
-      const res = await fetch("/api/generate-outline", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          paymentIntentId: id,
-          // No profile needed — server fetches it from KV using paymentIntentId
-          regenerate: true,
-          subjectTweaks: tweaks,
-          globalFeedback: globalFeedback.trim() || undefined,
-        }),
-      });
+    // Fire regeneration in background — generating page polls status
+    fetch("/api/generate-outline", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentIntentId: id,
+        regenerate: true,
+        subjectTweaks: tweaks,
+        globalFeedback: globalFeedback.trim() || undefined,
+      }),
+    }).catch(() => {
+      // Errors will surface via the status poller on the generating page
+    });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Regeneration failed");
-      }
-
-      const data = await res.json();
-      if (data.outline) {
-        // Update outline with new data, clear tweaks
-        setOutline(data.outline);
-        setSubjectTweaks({});
-        setExpandedTweaks({});
-        setGlobalFeedback("");
-      }
-    } catch (err: unknown) {
-      setRegenError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setRegenerating(false);
-    }
-  }, [outline, id, subjectTweaks, globalFeedback]);
+    // Redirect to scribe screen immediately so user sees progress
+    router.push(`/generating/${id}?phase=outline`);
+  }, [outline, id, subjectTweaks, globalFeedback, router]);
 
   // Trigger full plan generation and redirect immediately to the scribe screen.
   // We fire the API call without awaiting it so the parent sees the Sage right away —
