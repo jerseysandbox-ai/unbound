@@ -171,13 +171,14 @@ export default function ProfilePage() {
       setUserId(uid);
       if (!uid) return;
 
-      // Load plans_used to show upgrade banner when near/at limit
+      // Load plans_used to show upgrade banner when near/at limit (subscribers skip entirely)
       const { data: userData } = await supabase
         .from("unbound_users")
-        .select("plans_used")
+        .select("plans_used, subscription_status")
         .eq("id", uid)
         .single();
-      if (userData?.plans_used != null) {
+      const isSubscribed = userData?.subscription_status === "active";
+      if (!isSubscribed && userData?.plans_used != null) {
         setPlansUsed(userData.plans_used);
       }
 
