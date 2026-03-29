@@ -176,6 +176,9 @@ export default function GeneratingPage() {
   const [error, setError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0); // seconds since generation started
   const generateCalled = useRef(false);
+  // Suppress flash of outline messaging when transitioning from outline → full phase
+  const [phaseReady, setPhaseReady] = useState(false);
+  useEffect(() => { setPhaseReady(true); }, [phase]);
 
   // Email notification opt-in state
   const [notifyEmail, setNotifyEmail] = useState("");
@@ -311,9 +314,9 @@ export default function GeneratingPage() {
           <ScribeIllustration />
         </div>
 
-        {/* Heading */}
+        {/* Heading — hidden until phase is resolved to avoid outline→full flash */}
         <h1 className="text-xl font-bold text-[#2d2d2d] mb-1">
-          {phase === "full" ? "Your plan is being written..." : "Shaping your outline..."}
+          {!phaseReady ? "\u00A0" : phase === "full" ? "Your plan is being written..." : "Shaping your outline..."}
         </h1>
 
         {/* Status message */}

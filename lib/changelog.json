@@ -1,5 +1,10 @@
 [
   {
+    "version": "0.3.5",
+    "date": "2026-03-29",
+    "summary": "Fix empty account/plan history page \u2014 Supabase upsert now works correctly once unique constraint on kv_session_id is applied. Fix brief flash of outline messaging when transitioning from outline to full plan generation page."
+  },
+  {
     "version": "0.3.4",
     "date": "2026-03-29",
     "summary": "Feedback now shows submitter email in admin panel, notification email to Nicole, and CSV export. Admin feedback tab joins unbound_users to display email alongside each submission."
