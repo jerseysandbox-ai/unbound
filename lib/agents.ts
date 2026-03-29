@@ -91,12 +91,21 @@ export interface SubjectTweak {
 // ─── Helper: call Claude ─────────────────────────────────────────────────────
 
 async function callClaude(systemPrompt: string, userMessage: string, maxTokens = 2048): Promise<string> {
-  const response = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: maxTokens,
-    system: systemPrompt,
-    messages: [{ role: "user", content: userMessage }],
-  });
+  // 2-minute per-call timeout — prevents hung API calls from burning tokens indefinitely
+  const timeoutMs = 120_000;
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error("Claude API call timed out after 2 minutes")), timeoutMs)
+  );
+
+  const response = await Promise.race([
+    anthropic.messages.create({
+      model: MODEL,
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userMessage }],
+    }),
+    timeout,
+  ]);
 
   const firstBlock = response.content[0];
   if (firstBlock.type !== "text") throw new Error("Unexpected response type");

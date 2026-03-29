@@ -357,6 +357,22 @@ export default function GeneratingPage() {
           </p>
         </div>
 
+        {/* Taking too long — show start-over option after 4 minutes */}
+        {elapsed > 240 && !isDone && (
+          <div className="mt-6 w-full bg-[#fff8f0] border border-[#f0d9c0] rounded-2xl p-4 text-center">
+            <p className="text-sm font-semibold text-[#8a6040] mb-1">Taking longer than expected</p>
+            <p className="text-xs text-[#b08060] mb-3">
+              Something may have gone wrong. You can wait a little longer or start fresh.
+            </p>
+            <a
+              href="/profile"
+              className="inline-block text-xs font-semibold text-white bg-[#c47a40] hover:bg-[#a86030] px-4 py-2 rounded-lg transition-colors"
+            >
+              Start over
+            </a>
+          </div>
+        )}
+
         {/* Email notification opt-in — only show during full plan generation while still running */}
         {phase === "full" && !isDone && (
           <div className="mt-8 w-full bg-white rounded-2xl border border-[#e8e4e0] p-5 text-left">
