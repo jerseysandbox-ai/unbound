@@ -16,6 +16,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { GeneratedPlan, ScholarQuote } from "@/lib/agents";
 import FeedbackWidget from "@/components/FeedbackWidget";
+import { createClient } from "@/lib/supabase/client";
 
 // ─── Content parsing helpers ─────────────────────────────────────────────────
 
@@ -144,19 +145,38 @@ export default function PlanPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"teacher" | "student">("teacher");
+  const [isAuthed, setIsAuthed] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setIsAuthed(!!data.user);
+    });
+  }, []);
 
   useEffect(() => {
     if (!id) return;
 
     async function fetchPlan() {
       try {
+        // Try KV first via get-plan API
         const res = await fetch(`/api/get-plan/${id}`);
-        if (!res.ok) {
+        if (res.ok) {
           const data = await res.json();
-          throw new Error(data.error || "Plan not found");
+          setPlan(data);
+          return;
         }
-        const data = await res.json();
-        setPlan(data);
+
+        // KV expired — try Supabase fallback
+        const fallbackRes = await fetch(`/api/get-plan-fallback/${id}`);
+        if (fallbackRes.ok) {
+          const data = await fallbackRes.json();
+          setPlan(data);
+          return;
+        }
+
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Plan not found");
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to load plan");
       } finally {
@@ -231,7 +251,15 @@ export default function PlanPage() {
                 {plan.profile.childName}&apos;s Plan - {date}
               </p>
             </div>
-            <div className="flex gap-2 shrink-0">
+            <div className="flex gap-2 items-center shrink-0">
+              {isAuthed && (
+                <a
+                  href="/account"
+                  className="text-white/80 hover:text-white text-sm font-medium underline underline-offset-2 mr-1"
+                >
+                  My Plans
+                </a>
+              )}
               <a
                 href={`/api/download-pdf/${id}?type=teacher`}
                 download

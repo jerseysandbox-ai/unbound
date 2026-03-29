@@ -214,12 +214,92 @@ export async function POST(request: Request) {
     };
     await kv.set(`plan:${paymentIntentId}`, safeStoredPlan, { ex: KV_TTL });
 
+    // ── Persist plan content to Supabase (survives KV 24h expiry) ───────────
+    if (planUserId) {
+      try {
+        const { createAdminClient } = await import("@/lib/supabase/server");
+        const adminSupabase = createAdminClient();
+
+        const profile = generatedPlan.profile;
+        const subjectsList = (profile.subjectGoals ?? [])
+          .map((g: { subject: string }) => g.subject)
+          .filter(Boolean)
+          .join(", ");
+
+        await adminSupabase.from("unbound_plans").upsert(
+          {
+            user_id: planUserId,
+            kv_session_id: paymentIntentId,
+            teacher_plan: generatedPlan.plan,
+            student_plan: generatedPlan.plan, // same source; display layer splits via tags
+            child_nickname: profile.childName ?? null,
+            grade_level: profile.gradeLevel ?? null,
+            subjects: subjectsList || null,
+            plan_summary: generatedPlan.plan.slice(0, 200),
+            payment_intent_id: paymentIntentId.startsWith("free_") ? null : paymentIntentId,
+          },
+          { onConflict: "kv_session_id" }
+        );
+      } catch (supaErr) {
+        // Non-fatal — plan is already in KV; log and continue
+        console.error("[generate-full-plan] Supabase upsert failed:", supaErr);
+      }
+    }
+
     // ── Mark complete ────────────────────────────────────────────────────────
     await kv.set(
       `status:${paymentIntentId}`,
       { phase: "complete", progress: 100, message: "Your plan is ready!" },
       { ex: KV_TTL }
     );
+
+    // ── Send email notification if requested ─────────────────────────────────
+    try {
+      const notifyData = await kv.get<{ email: string }>(`notify:${paymentIntentId}`);
+      if (notifyData?.email) {
+        const htmlBody = `
+            <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2d2d2d;">
+              <h2 style="color: #5b8f8a;">Your lesson plan is ready! 🎉</h2>
+              <p>Hi there!</p>
+              <p>Your lesson plan is ready. Click below to view and download it:</p>
+              <p style="margin: 24px 0;">
+                <a href="https://unboundlearner.com/plan/${paymentIntentId}"
+                   style="background: #5b8f8a; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                  View Your Plan →
+                </a>
+              </p>
+              <p>You can also find all your past plans in your account:</p>
+              <p style="margin: 24px 0;">
+                <a href="https://unboundlearner.com/account"
+                   style="color: #5b8f8a; font-weight: 600;">
+                  My Account → https://unboundlearner.com/account
+                </a>
+              </p>
+              <p style="color: #8a8580; font-size: 14px;">— The Unbound Team</p>
+            </div>
+          `;
+        const plainText = `Your lesson plan is ready!\n\nView it at: https://unboundlearner.com/plan/${paymentIntentId}\n\nOr visit your account: https://unboundlearner.com/account`;
+        await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          },
+          body: JSON.stringify({
+            from: "Unbound <hello@unboundlearner.com>",
+            to: notifyData.email,
+            subject: "Your Unbound plan is ready! 🎉",
+            html: htmlBody,
+            text: plainText,
+          }),
+        });
+        // Clean up notification key
+        await kv.del(`notify:${paymentIntentId}`);
+      }
+    } catch (emailErr) {
+      // Non-fatal — plan is done, email is best-effort
+      console.error("[generate-full-plan] Email notification failed:", emailErr);
+    }
 
     // ── plans_used is incremented in generate-outline (phase 1) ─────────────
     // We do NOT increment here to avoid double-counting the same plan generation.

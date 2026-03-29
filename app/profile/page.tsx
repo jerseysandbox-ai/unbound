@@ -343,9 +343,16 @@ export default function ProfilePage() {
       <div className="max-w-xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <a href="/" className="text-[#5b8f8a] font-semibold text-lg">
-            Unbound
-          </a>
+          <div className="flex items-center justify-center gap-4">
+            <a href="/" className="text-[#5b8f8a] font-semibold text-lg">
+              Unbound
+            </a>
+            {userId && (
+              <a href="/account" className="text-sm text-[#5b8f8a] font-medium underline underline-offset-2">
+                My Plans
+              </a>
+            )}
+          </div>
           <h1 className="text-3xl font-bold text-[#2d2d2d] mt-4 mb-2">
             {hasSavedProfile ? `Welcome back` : "Tell us about your learner"}
           </h1>
