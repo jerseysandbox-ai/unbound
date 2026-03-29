@@ -55,9 +55,12 @@ export async function POST(request: Request) {
     const body: RequestBody = await request.json();
     const { subject, zip, distance, turnstileToken } = body;
 
-    // Validate inputs
+    // Validate inputs — cap subject at 200 chars to prevent prompt bloat
     if (!subject?.trim()) {
       return NextResponse.json({ error: "Subject is required" }, { status: 400 });
+    }
+    if (subject.trim().length > 200) {
+      return NextResponse.json({ error: "Subject must be 200 characters or less" }, { status: 400 });
     }
     if (!zip?.trim() || !/^\d{5}$/.test(zip.trim())) {
       return NextResponse.json({ error: "A valid 5-digit zip code is required" }, { status: 400 });
