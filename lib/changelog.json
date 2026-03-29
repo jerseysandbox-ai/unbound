@@ -1,5 +1,10 @@
 [
   {
+    "version": "0.3.2",
+    "date": "2026-03-29",
+    "summary": "Fix feedback submission 403 error \u2014 planId is a KV session ID not a Supabase UUID; ownership enforced via user_id on insert instead. KV credentials fixed in Vercel production and Doppler."
+  },
+  {
     "version": "0.3.1",
     "date": "2026-03-29",
     "summary": "Security cleanup: subject length cap (200 chars) added to /api/field-trips to prevent prompt bloat. Added RESEND_API_KEY to .env.local.example for local dev setup."

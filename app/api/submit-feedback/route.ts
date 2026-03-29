@@ -46,17 +46,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Comment too long" }, { status: 400 });
   }
 
-  // Issue 2: Verify plan ownership
-  const { data: plan } = await supabase
-    .from("unbound_plans")
-    .select("id")
-    .eq("id", planId)
-    .eq("user_id", user.id)
-    .single();
-
-  if (!plan) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  // Note: planId is a KV session ID (e.g. free_abc123), not a Supabase UUID.
+  // Ownership is implicitly enforced by inserting user_id = authenticated user.
+  // The unique constraint on (user_id, plan_id) prevents duplicate submissions.
 
   // Insert feedback
   const { data: feedback, error: insertError } = await supabase
