@@ -342,10 +342,10 @@ export default function GeneratingPage() {
           <p>{estimatedTime}</p>
           <p className="tabular-nums">
             {elapsed < 10
-              ? `${elapsed}s elapsed — still working, hang tight!`
+              ? `${elapsed}s elapsed, still working!`
               : elapsed < 60
-              ? `${elapsed}s elapsed — almost there...`
-              : `${Math.floor(elapsed / 60)}m ${elapsed % 60}s elapsed — wrapping up the final touches...`}
+              ? `${elapsed}s elapsed, almost there...`
+              : `${Math.floor(elapsed / 60)}m ${elapsed % 60}s elapsed, wrapping up the final touches...`}
           </p>
         </div>
 

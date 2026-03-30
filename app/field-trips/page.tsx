@@ -121,7 +121,7 @@ export default function FieldTripsPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Field Trip Finder</h1>
           <p className="text-gray-500 text-sm leading-relaxed">
             Tell us what you&apos;re studying and where you are. We&apos;ll suggest field trips
-            that bring your unit to life — museums, nature centers, historical sites, and more.
+            that bring your unit to life: museums, nature centers, historical sites, and more.
           </p>
         </div>
 
