@@ -179,7 +179,7 @@ export default function HomePage() {
           <span className="block text-[#1a5c5a]">around <em>your</em> child.</span>
         </h1>
         <p className="text-lg text-[#8a8580] mb-10 leading-relaxed">
-          Personalized for neurodivergent and gifted learners — because no two kids
+          Personalized for neurodivergent and gifted learners, because no two kids
           learn the same way. Tell us about your child and get a full daily plan shaped
           around their strengths, their pace, and your goals for today.
         </p>
@@ -215,7 +215,7 @@ export default function HomePage() {
             {
               step: "3",
               title: "Download your plan",
-              desc: "Your plan arrives built around your specific child — their strengths, their pace, their interests, and your goals for the day.",
+              desc: "Your plan arrives built around your specific child: their strengths, their pace, their interests, and your goals for the day.",
             },
           ].map(({ step, title, desc }) => (
             <div key={step} className="text-center">
@@ -268,7 +268,7 @@ export default function HomePage() {
             More Tools for Your Family
           </h2>
           <p className="text-center text-[#8a8580] text-sm mb-8">
-            Reading support, book discovery, and real-world learning — all personalized to your child.
+            Reading support, book discovery, and real-world learning. All personalized to your child.
           </p>
           <div className="grid sm:grid-cols-2 gap-5">
             {/* Book Companion card */}
@@ -321,7 +321,7 @@ export default function HomePage() {
                 <span className="font-semibold text-[#2d2d2d] text-base">Field Trip Finder</span>
               </div>
               <p className="text-sm text-[#8a8580] leading-relaxed">
-                Tell us what you&apos;re studying and your zip code — we&apos;ll suggest museums, nature centers, historical sites, and more that bring your unit to life.
+                Tell us what you&apos;re studying and your zip code. We&apos;ll suggest museums, nature centers, historical sites, and more that bring your unit to life.
               </p>
               <span className="text-xs font-semibold text-[#1a5c5a] group-hover:underline mt-auto">
                 Find field trips near you →
@@ -337,7 +337,7 @@ export default function HomePage() {
           Ready to see it in action?
         </h2>
         <p className="text-[#8a8580] mb-8">
-          Your first 4 plans are free. No credit card, no subscription — just a plan built
+          Your first 4 plans are free. No credit card, no subscription. Just a plan built
           around your specific kid.
         </p>
         <Link
