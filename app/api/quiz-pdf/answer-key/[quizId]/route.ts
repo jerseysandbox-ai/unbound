@@ -47,9 +47,14 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const quizData = await kv.get<{ questions: QuizQuestion[] }>(quizId);
+    const quizData = await kv.get<{ questions: QuizQuestion[]; userId?: string }>(quizId);
     if (!quizData || !quizData.questions) {
       return NextResponse.json({ error: "Quiz not found or expired" }, { status: 404 });
+    }
+
+    // IDOR fix: verify ownership
+    if (quizData.userId && quizData.userId !== user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     let questionsHtml = "";

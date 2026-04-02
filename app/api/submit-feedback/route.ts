@@ -46,9 +46,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Comment too long" }, { status: 400 });
   }
 
-  // Note: planId is a KV session ID (e.g. free_abc123), not a Supabase UUID.
-  // Ownership is implicitly enforced by inserting user_id = authenticated user.
-  // The unique constraint on (user_id, plan_id) prevents duplicate submissions.
+  // Ownership check: verify this plan belongs to the submitting user
+  const { data: planRow, error: planErr } = await supabase
+    .from("unbound_plans")
+    .select("id")
+    .eq("kv_session_id", planId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (planErr || !planRow) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   // Insert feedback
   const { data: feedback, error: insertError } = await supabase

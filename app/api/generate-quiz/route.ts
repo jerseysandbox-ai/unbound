@@ -210,7 +210,7 @@ ${trimmedPlan}`;
 
     // Store in KV with 24h TTL
     const quizId = `quiz_${planId}_${Date.now()}`;
-    await kv.set(quizId, { questions: parsed.questions }, { ex: 86400 });
+    await kv.set(quizId, { questions: parsed.questions, userId: user.id }, { ex: 86400 });
 
     return NextResponse.json({ quizId, questions: parsed.questions });
   } catch (err) {
