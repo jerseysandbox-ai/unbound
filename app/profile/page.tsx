@@ -96,6 +96,7 @@ const US_STATES = [
 const SUBJECT_OPTIONS = [
   "Math",
   "Reading & Language Arts",
+  "Spelling",
   "Science",
   "Social Studies",
   "History",

@@ -42,6 +42,10 @@ function SubjectIcon({ subject }: { subject: string }) {
   if (s.includes("language") || s.includes("literacy"))
     return <svg {...props}><path d="M2 4.5A2.5 2.5 0 014.5 2H20v18H4.5A2.5 2.5 0 012 17.5v-13z"/><path d="M20 2h1a1 1 0 011 1v16a1 1 0 01-1 1h-1"/><path d="M12 2v18"/></svg>;
 
+  // Spelling — open book (fallback)
+  if (s.includes("spelling"))
+    return <svg {...props}><path d="M2 4.5A2.5 2.5 0 014.5 2H20v18H4.5A2.5 2.5 0 012 17.5v-13z"/><path d="M20 2h1a1 1 0 011 1v16a1 1 0 01-1 1h-1"/><path d="M12 2v18"/></svg>;
+
   // Social Studies — globe
   if (s.includes("social") || s.includes("history") || s.includes("geography"))
     return <svg {...props}><circle cx="12" cy="12" r="9"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>;
@@ -260,6 +264,12 @@ export default function PlanPage() {
                   My Plans
                 </a>
               )}
+              <a
+                href={`/quiz/${id}`}
+                className="bg-white/20 text-white font-semibold text-sm px-3 py-2 rounded-lg hover:bg-white/30 transition-colors border border-white/30"
+              >
+                Make a Quiz
+              </a>
               <a
                 href={`/api/download-pdf/${id}?type=teacher`}
                 download
