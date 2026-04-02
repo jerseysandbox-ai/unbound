@@ -100,8 +100,12 @@ export async function POST(request: Request) {
       planContent = planRow.content;
     } else {
       // Try KV fallback
-      const kvData = await kv.get<{ plan?: string }>(`plan:${planId}`);
+      const kvData = await kv.get<{ plan?: string; userId?: string }>(`plan:${planId}`);
       if (kvData?.plan) {
+        // Verify ownership before using KV data
+        if (!kvData.userId || kvData.userId !== user.id) {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
         planContent = kvData.plan;
       }
     }
