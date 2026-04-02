@@ -56,6 +56,12 @@ export default function QuizPage() {
   ]);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
+  // Subject validation error
+  const [subjectError, setSubjectError] = useState<string | null>(null);
+
+  // PDF loading state
+  const [pdfLoading, setPdfLoading] = useState<"student" | "answer-key" | null>(null);
+
   // Quiz state
   const [quiz, setQuiz] = useState<QuizData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -78,6 +84,13 @@ export default function QuizPage() {
   async function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setSubjectError(null);
+
+    // Subject validation
+    if (!subject.trim()) {
+      setSubjectError("Please enter a subject before generating a quiz.");
+      return;
+    }
 
     if (!turnstileToken) {
       setError("Please complete the security check.");
@@ -158,6 +171,16 @@ export default function QuizPage() {
     setSubmitted(true);
   }
 
+  function handleGenerateNew() {
+    setQuiz(null);
+    setAnswers({});
+    setSubmitted(false);
+    setScore(null);
+    setError(null);
+    setSubjectError(null);
+    setActiveTab("take");
+  }
+
   function isCorrect(q: Question): boolean | null {
     if (q.type === "extended") return null;
     const userAnswer = answers[q.id];
@@ -196,14 +219,25 @@ export default function QuizPage() {
           ) : (
             <form onSubmit={handleGenerate} className="bg-white rounded-2xl shadow-sm border border-[#e8e4e0] p-6 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-[#2d2d2d] mb-1">Subject</label>
+                <label className="block text-sm font-medium text-[#2d2d2d] mb-1">
+                  Subject <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
+                  required
                   value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
+                  onChange={(e) => {
+                    setSubject(e.target.value);
+                    if (e.target.value.trim()) setSubjectError(null);
+                  }}
                   placeholder="e.g. Math, Science, Spelling"
-                  className="w-full border border-[#e0dbd5] rounded-lg px-3 py-2.5 text-[#2d2d2d] bg-[#faf9f6] focus:outline-none focus:ring-2 focus:ring-[#5b8f8a] text-sm"
+                  className={`w-full border rounded-lg px-3 py-2.5 text-[#2d2d2d] bg-[#faf9f6] focus:outline-none focus:ring-2 focus:ring-[#5b8f8a] text-sm ${
+                    subjectError ? "border-red-400 ring-1 ring-red-300" : "border-[#e0dbd5]"
+                  }`}
                 />
+                {subjectError && (
+                  <p className="mt-1 text-xs text-red-600">{subjectError}</p>
+                )}
               </div>
 
               {/* Number of questions */}
@@ -346,6 +380,13 @@ export default function QuizPage() {
                 ? `${Math.round((score.correct / score.total) * 100)}% correct`
                 : "No scorable questions"}
             </p>
+            <button
+              type="button"
+              onClick={handleGenerateNew}
+              className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-[#5b8f8a] hover:bg-[#3d6e69] text-white text-sm font-semibold rounded-xl transition-colors"
+            >
+              Generate New Quiz
+            </button>
           </div>
         )}
 
@@ -429,8 +470,8 @@ export default function QuizPage() {
                       {q.matchPairs.map((pair, pi) => {
                         const currentAnswers = (Array.isArray(answers[q.id]) ? answers[q.id] : []) as string[];
                         return (
-                          <div key={pi} className="flex items-center gap-3 text-sm">
-                            <span className="font-medium text-[#2d2d2d] min-w-[120px]">{pair.left}</span>
+                          <div key={pi} className="flex flex-wrap items-center gap-3 text-sm">
+                            <span className="font-medium text-[#2d2d2d] min-w-[140px]">{pair.left}</span>
                             <span className="text-[#8a8580]">=</span>
                             <select
                               value={currentAnswers[pi] ?? ""}
@@ -442,7 +483,7 @@ export default function QuizPage() {
                                 setAnswer(q.id, updated);
                               }}
                               disabled={submitted}
-                              className="flex-1 border border-[#e0dbd5] rounded-lg px-3 py-2 text-[#2d2d2d] bg-[#faf9f6] focus:outline-none focus:ring-2 focus:ring-[#5b8f8a] text-sm disabled:opacity-70"
+                              className="flex-1 min-w-[140px] border border-[#e0dbd5] rounded-lg px-3 py-2 text-[#2d2d2d] bg-[#faf9f6] focus:outline-none focus:ring-2 focus:ring-[#5b8f8a] text-sm disabled:opacity-70"
                             >
                               <option value="">Select...</option>
                               {q.matchPairs!.map((mp) => (
@@ -503,22 +544,50 @@ export default function QuizPage() {
             <p className="text-[#2d2d2d] text-sm mb-4">
               Download printable versions of this quiz.
             </p>
-            <a
-              href={`/api/quiz-pdf/student/${quiz.quizId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full bg-[#5b8f8a] hover:bg-[#3d6e69] text-white font-semibold text-center py-3 rounded-xl transition-colors"
+            <button
+              type="button"
+              disabled={pdfLoading !== null}
+              onClick={async () => {
+                setPdfLoading("student");
+                try {
+                  window.open(`/api/quiz-pdf/student/${quiz.quizId}`, "_blank", "noopener,noreferrer");
+                } finally {
+                  setTimeout(() => setPdfLoading(null), 1500);
+                }
+              }}
+              className="flex items-center justify-center gap-2 w-full bg-[#5b8f8a] hover:bg-[#3d6e69] disabled:opacity-70 text-white font-semibold text-center py-3 rounded-xl transition-colors"
             >
-              Download Student Quiz (PDF)
-            </a>
-            <a
-              href={`/api/quiz-pdf/answer-key/${quiz.quizId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full bg-white border-2 border-[#5b8f8a] text-[#5b8f8a] hover:bg-[#e8f4f3] font-semibold text-center py-3 rounded-xl transition-colors"
+              {pdfLoading === "student" ? (
+                <>
+                  <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Preparing PDF...
+                </>
+              ) : (
+                "Download Student Quiz (PDF)"
+              )}
+            </button>
+            <button
+              type="button"
+              disabled={pdfLoading !== null}
+              onClick={async () => {
+                setPdfLoading("answer-key");
+                try {
+                  window.open(`/api/quiz-pdf/answer-key/${quiz.quizId}`, "_blank", "noopener,noreferrer");
+                } finally {
+                  setTimeout(() => setPdfLoading(null), 1500);
+                }
+              }}
+              className="flex items-center justify-center gap-2 w-full bg-white border-2 border-[#5b8f8a] text-[#5b8f8a] hover:bg-[#e8f4f3] disabled:opacity-70 font-semibold text-center py-3 rounded-xl transition-colors"
             >
-              Download Answer Key (PDF)
-            </a>
+              {pdfLoading === "answer-key" ? (
+                <>
+                  <span className="inline-block w-4 h-4 border-2 border-[#5b8f8a] border-t-transparent rounded-full animate-spin" />
+                  Preparing PDF...
+                </>
+              ) : (
+                "Download Answer Key (PDF)"
+              )}
+            </button>
           </div>
         )}
       </div>
