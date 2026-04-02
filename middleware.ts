@@ -17,6 +17,7 @@ const PROTECTED_PAGE_PREFIXES = [
   "/generating",
   "/outline",
   "/plan",
+  "/quiz",
 ];
 
 // API routes that require authentication — return 401 if not authed
@@ -27,6 +28,8 @@ const PROTECTED_API_PREFIXES = [
   "/api/get-outline/",
   "/api/get-plan/",
   "/api/plan-status/",
+  "/api/generate-quiz",
+  "/api/quiz-pdf",
 ];
 
 export async function middleware(request: NextRequest) {

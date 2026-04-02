@@ -226,6 +226,7 @@ export default function QuizPage() {
                   type="text"
                   required
                   value={subject}
+                  maxLength={200}
                   onChange={(e) => {
                     setSubject(e.target.value);
                     if (e.target.value.trim()) setSubjectError(null);

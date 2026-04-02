@@ -66,6 +66,9 @@ export async function POST(request: Request) {
     if (!planId || !turnstileToken) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
+    if (!subject || typeof subject !== "string" || subject.length > 200) {
+      return NextResponse.json({ error: "Subject must be 200 characters or fewer" }, { status: 400 });
+    }
     if (![5, 10, 15].includes(questionCount)) {
       return NextResponse.json({ error: "Invalid question count" }, { status: 400 });
     }
