@@ -156,7 +156,12 @@ export default function AccountPage() {
                       >
                         View Plan
                       </a>
-
+                      <a
+                        href={`/quiz/${plan.kv_session_id}`}
+                        className="bg-white text-[#5b8f8a] text-sm font-semibold px-3 py-2 rounded-lg border border-[#5b8f8a] hover:bg-[#e8f4f3] transition-colors whitespace-nowrap"
+                      >
+                        Quiz
+                      </a>
                     </div>
                   )}
                 </div>

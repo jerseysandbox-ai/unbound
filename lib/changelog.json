@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.5.0",
+    "date": "2026-04-02",
+    "summary": "Quiz Generator with interactive scoring and printable PDFs",
+    "changes": [
+      "Quiz Generator: generate quizzes from any lesson plan",
+      "5 question types: multiple choice, true/false, fill in the blank, matching, extended response",
+      "Interactive on-screen scoring with results summary",
+      "Printable student quiz and answer key PDFs",
+      "Difficulty levels: Easy, Medium, Challenge",
+      "Make a Quiz button on plan pages and account history",
+      "Spelling added to subject dropdown"
+    ]
+  },
+  {
     "version": "0.4.1",
     "date": "2026-03-29",
     "summary": "Fix account page showing raw grade number (e.g. \"4\") \u2014 now displays as \"Grade 4\"."
