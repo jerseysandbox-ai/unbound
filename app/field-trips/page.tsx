@@ -283,13 +283,13 @@ function FieldTripsPageInner() {
                   });
                   if (!res.ok) throw new Error("Failed to generate PDF");
                   const html = await res.text();
-                  // Open in a new window with auto-print so browser saves as PDF
+                  // Open in a new window. User selects "Save as PDF" in the print dialog.
                   const win = window.open('', '_blank');
                   if (win) {
-                    win.document.write(html);
+                    // Inject a print-on-load script into the HTML
+                    const printHtml = html.replace('</body>', '<script>window.onload=function(){window.print();}<\/script></body>');
+                    win.document.write(printHtml);
                     win.document.close();
-                    // Small delay so styles load before print dialog opens
-                    setTimeout(() => { win.focus(); win.print(); }, 400);
                   }
                 } catch (err) {
                   setError(err instanceof Error ? err.message : "Could not generate PDF. Please try again.");
@@ -306,7 +306,7 @@ function FieldTripsPageInner() {
                   Preparing PDF...
                 </span>
               ) : (
-                "Download as PDF"
+                "Save as PDF (opens print dialog)"
               )}
             </button>
 
