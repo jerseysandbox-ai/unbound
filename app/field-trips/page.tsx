@@ -63,6 +63,7 @@ export default function FieldTripsPage() {
   const [error, setError] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [resetKey, setResetKey] = useState(0);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   // Auth guard — redirect to login if not signed in
   useEffect(() => {
@@ -260,18 +261,46 @@ export default function FieldTripsPage() {
 
             <button
               onClick={async () => {
-                const res = await fetch('/api/field-trips-pdf', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ subject, zip, distance, suggestions }),
-                });
-                const html = await res.text();
-                const win = window.open('', '_blank');
-                if (win) { win.document.write(html); win.document.close(); win.print(); }
+                setPdfLoading(true);
+                setError("");
+                try {
+                  const res = await fetch('/api/field-trips-pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subject, zip, distance, suggestions }),
+                  });
+                  if (!res.ok) throw new Error("Failed to generate PDF");
+                  const html = await res.text();
+                  const blob = new Blob([html], { type: 'text/html' });
+                  const url = URL.createObjectURL(blob);
+                  const win = window.open(url, '_blank');
+                  if (!win) {
+                    // Popup blocked — fall back to download link
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `field-trips-${subject.replace(/\s+/g, '-').toLowerCase()}.html`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                  }
+                  setTimeout(() => URL.revokeObjectURL(url), 10000);
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "Could not generate PDF. Please try again.");
+                } finally {
+                  setPdfLoading(false);
+                }
               }}
-              className="mt-6 w-full py-2 px-4 rounded-xl border border-[#4a9d8f] text-[#1a5c5a] font-medium hover:bg-[#f0faf9] transition-colors text-sm"
+              disabled={pdfLoading}
+              className="mt-6 w-full py-2 px-4 rounded-xl border border-[#4a9d8f] text-[#1a5c5a] font-medium hover:bg-[#f0faf9] disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
             >
-              Download as PDF
+              {pdfLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-[#5b8f8a] border-t-transparent rounded-full animate-spin" />
+                  Preparing PDF...
+                </span>
+              ) : (
+                "Download as PDF"
+              )}
             </button>
 
             {/* Search again nudge */}
