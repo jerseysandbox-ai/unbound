@@ -1,5 +1,15 @@
 [
   {
+    "version": "0.5.2",
+    "date": "2026-04-04",
+    "summary": "Real PDF generation for field trips using @react-pdf/renderer",
+    "changes": [
+      "Field trip Download PDF now produces a real .pdf file (not HTML)",
+      "Account page field trip history has Download PDF button",
+      "PDF generated server-side using @react-pdf/renderer, same as lesson plan PDFs"
+    ]
+  },
+  {
     "version": "0.5.1",
     "date": "2026-04-04",
     "summary": "Field trip formatting, PDF download, history tracking, Turnstile fix",
