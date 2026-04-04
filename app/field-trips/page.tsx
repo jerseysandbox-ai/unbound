@@ -30,6 +30,28 @@ function parseSuggestions(raw: string): string[] {
   return entries.length > 1 ? entries : [raw];
 }
 
+// Parse a single suggestion string into title + body lines
+function parseSuggestion(text: string): { title: string; lines: string[] } {
+  const lines = text.split('\n').map(l => l.replace(/^[*#]+\s*/, '').trim()).filter(Boolean);
+  const firstLine = lines[0] || '';
+  const title = firstLine.replace(/^\d+\.\s*/, '').replace(/\*\*/g, '');
+  const body = lines.slice(1).map(l => l.replace(/\*\*/g, '').replace(/^-\s*/, ''));
+  return { title, lines: body };
+}
+
+// Render a body line, bolding label prefixes like "Why it fits:" or "How to find it:"
+function SuggestionLine({ text }: { text: string }) {
+  const match = text.match(/^([A-Za-z][A-Za-z\s]+:)\s*(.*)/);
+  if (match) {
+    return (
+      <p className="mb-1 text-sm text-gray-700 leading-relaxed">
+        <span className="font-semibold text-gray-800">{match[1]}</span> {match[2]}
+      </p>
+    );
+  }
+  return <p className="mb-1 text-sm text-gray-700 leading-relaxed">{text}</p>;
+}
+
 export default function FieldTripsPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
@@ -221,16 +243,36 @@ export default function FieldTripsPage() {
             <p className="text-xs text-gray-400">
               These are suggestions based on types of venues commonly found near {zip}. Always verify hours and details before visiting.
             </p>
-            {suggestions.map((trip, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"
-              >
-                <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed whitespace-pre-line">
-                  {trip}
+            {suggestions.map((trip, i) => {
+              const { title, lines } = parseSuggestion(trip);
+              return (
+                <div
+                  key={i}
+                  className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"
+                >
+                  <h3 className="font-bold text-[#1a5c5a] mb-2">{title}</h3>
+                  {lines.map((line, j) => (
+                    <SuggestionLine key={j} text={line} />
+                  ))}
                 </div>
-              </div>
-            ))}
+              );
+            })}
+
+            <button
+              onClick={async () => {
+                const res = await fetch('/api/field-trips-pdf', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ subject, zip, distance, suggestions }),
+                });
+                const html = await res.text();
+                const win = window.open('', '_blank');
+                if (win) { win.document.write(html); win.document.close(); win.print(); }
+              }}
+              className="mt-6 w-full py-2 px-4 rounded-xl border border-[#4a9d8f] text-[#1a5c5a] font-medium hover:bg-[#f0faf9] transition-colors text-sm"
+            >
+              Download as PDF
+            </button>
 
             {/* Search again nudge */}
             <div className="pt-4 text-center">
