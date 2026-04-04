@@ -120,11 +120,12 @@ export default function AccountPage() {
           </div>
         )}
 
+        {/* Fix 1: Combined empty state mentions both plans and field trips */}
         {!loading && !error && plans.length === 0 && fieldTrips.length === 0 && (
           <div className="text-center py-16">
             <div className="text-5xl mb-4">📚</div>
-            <h2 className="text-xl font-bold text-[#2d2d2d] mb-2">No plans yet</h2>
-            <p className="text-[#8a8580] mb-6">Your generated plans will appear here.</p>
+            <h2 className="text-xl font-bold text-[#2d2d2d] mb-2">No activity yet</h2>
+            <p className="text-[#8a8580] mb-6">Your lesson plans and field trip searches will appear here.</p>
             <a
               href="/profile"
               className="inline-block bg-[#5b8f8a] text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-[#3d6e69] transition-colors"
@@ -134,11 +135,14 @@ export default function AccountPage() {
           </div>
         )}
 
-        {!loading && plans.length > 0 && (
+        {/* Plans section — only show when there are plans */}
+        {!loading && !error && plans.length > 0 && (
           <div className="space-y-4">
-            <h2 className="text-sm font-semibold text-[#8a8580] uppercase tracking-wide mb-6">
+            {/* Fix 3: Proper h2 section heading */}
+            <h2 className="text-lg font-bold text-[#2d2d2d] mb-1">Your Plans</h2>
+            <p className="text-sm text-[#8a8580] uppercase tracking-wide mb-6">
               {plans.length} plan{plans.length !== 1 ? "s" : ""}
-            </h2>
+            </p>
 
             {plans.map((plan) => (
               <div
@@ -189,41 +193,64 @@ export default function AccountPage() {
           </div>
         )}
 
-        {/* Field Trips */}
-        {!loading && fieldTrips.length > 0 && (
+        {/* Fix 2: Field Trips section always renders when user has any data (plans or trips) */}
+        {!loading && !error && (plans.length > 0 || fieldTrips.length > 0) && (
           <div className="space-y-4 mt-10">
-            <h2 className="text-sm font-semibold text-[#8a8580] uppercase tracking-wide mb-6">
-              {fieldTrips.length} field trip search{fieldTrips.length !== 1 ? "es" : ""}
-            </h2>
+            {/* Fix 3: Proper h2 section heading */}
+            <h2 className="text-lg font-bold text-[#2d2d2d] mb-1">Your Field Trip Searches</h2>
 
-            {fieldTrips.map((trip) => {
-              let count = 0;
-              try { count = (JSON.parse(trip.suggestions) as string[]).length; } catch { /* */ }
-              const searchUrl = `/field-trips?subject=${encodeURIComponent(trip.subject)}&zip=${encodeURIComponent(trip.zip)}`;
-              return (
-                <div
-                  key={trip.id}
-                  className="bg-white rounded-2xl border border-[#e8e4e0] shadow-sm p-5 hover:shadow-md transition-shadow"
+            {fieldTrips.length === 0 ? (
+              /* Fix 2: Placeholder when user has plans but no field trips */
+              <div className="bg-white rounded-2xl border border-[#e8e4e0] shadow-sm p-8 text-center">
+                <div className="text-3xl mb-3">🗺️</div>
+                <p className="text-[#8a8580] mb-4">No field trip searches yet.</p>
+                <a
+                  href="/field-trips"
+                  className="inline-block bg-[#5b8f8a] text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-[#3d6e69] transition-colors"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <p className="text-xs text-[#8a8580] mb-1">{formatDate(trip.created_at)}</p>
-                      <h3 className="font-semibold text-[#2d2d2d] text-base">{trip.subject}</h3>
-                      <p className="text-sm text-[#8a8580] mt-1">
-                        Near {trip.zip}, within {trip.distance} miles
-                        {count > 0 && <span className="ml-2">/ {count} suggestion{count !== 1 ? "s" : ""} found</span>}
-                      </p>
-                    </div>
-                    <a
-                      href={searchUrl}
-                      className="bg-white text-[#5b8f8a] text-sm font-semibold px-3 py-2 rounded-lg border border-[#5b8f8a] hover:bg-[#e8f4f3] transition-colors whitespace-nowrap shrink-0"
+                  Find Field Trips
+                </a>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-[#8a8580] uppercase tracking-wide mb-6">
+                  {fieldTrips.length} search{fieldTrips.length !== 1 ? "es" : ""}
+                </p>
+                {fieldTrips.map((trip) => {
+                  /* Fix 4: try/catch with fallback to [] for malformed suggestions */
+                  let count = 0;
+                  try {
+                    count = (JSON.parse(trip.suggestions) as string[]).length;
+                  } catch {
+                    count = 0;
+                  }
+                  const searchUrl = `/field-trips?subject=${encodeURIComponent(trip.subject)}&zip=${encodeURIComponent(trip.zip)}`;
+                  return (
+                    <div
+                      key={trip.id}
+                      className="bg-white rounded-2xl border border-[#e8e4e0] shadow-sm p-5 hover:shadow-md transition-shadow"
                     >
-                      Search Again
-                    </a>
-                  </div>
-                </div>
-              );
-            })}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <p className="text-xs text-[#8a8580] mb-1">{formatDate(trip.created_at)}</p>
+                          <h3 className="font-semibold text-[#2d2d2d] text-base">{trip.subject}</h3>
+                          <p className="text-sm text-[#8a8580] mt-1">
+                            Near {trip.zip}, within {trip.distance} miles
+                            {count > 0 && <span className="ml-2">/ {count} suggestion{count !== 1 ? "s" : ""} found</span>}
+                          </p>
+                        </div>
+                        <a
+                          href={searchUrl}
+                          className="bg-white text-[#5b8f8a] text-sm font-semibold px-3 py-2 rounded-lg border border-[#5b8f8a] hover:bg-[#e8f4f3] transition-colors whitespace-nowrap shrink-0"
+                        >
+                          Search Again
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            )}
           </div>
         )}
       </div>
