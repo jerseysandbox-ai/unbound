@@ -281,19 +281,16 @@ export default function FieldTripsPage() {
                   });
                   if (!res.ok) throw new Error("Failed to generate PDF");
                   const html = await res.text();
+                  // Force download directly — never open in a new tab
                   const blob = new Blob([html], { type: 'text/html' });
                   const url = URL.createObjectURL(blob);
-                  const win = window.open(url, '_blank');
-                  if (!win) {
-                    // Popup blocked — fall back to download link
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `field-trips-${subject.replace(/\s+/g, '-').toLowerCase()}.html`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                  }
-                  setTimeout(() => URL.revokeObjectURL(url), 10000);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `field-trips-${subject.replace(/\s+/g, '-').toLowerCase()}.html`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  setTimeout(() => URL.revokeObjectURL(url), 5000);
                 } catch (err) {
                   setError(err instanceof Error ? err.message : "Could not generate PDF. Please try again.");
                 } finally {
