@@ -21,6 +21,15 @@ interface PlanRecord {
   created_at: string;
 }
 
+interface FieldTripRecord {
+  id: string;
+  subject: string;
+  zip: string;
+  distance: string;
+  suggestions: string;
+  created_at: string;
+}
+
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
     weekday: "long",
@@ -33,6 +42,7 @@ function formatDate(iso: string): string {
 export default function AccountPage() {
   const router = useRouter();
   const [plans, setPlans] = useState<PlanRecord[]>([]);
+  const [fieldTrips, setFieldTrips] = useState<FieldTripRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +70,15 @@ export default function AccountPage() {
       } else {
         setPlans(data ?? []);
       }
+
+      const { data: trips } = await supabase
+        .from("field_trips")
+        .select("id, subject, zip, distance, suggestions, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      setFieldTrips(trips ?? []);
       setLoading(false);
     }
 
@@ -101,7 +120,7 @@ export default function AccountPage() {
           </div>
         )}
 
-        {!loading && !error && plans.length === 0 && (
+        {!loading && !error && plans.length === 0 && fieldTrips.length === 0 && (
           <div className="text-center py-16">
             <div className="text-5xl mb-4">📚</div>
             <h2 className="text-xl font-bold text-[#2d2d2d] mb-2">No plans yet</h2>
@@ -167,6 +186,44 @@ export default function AccountPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Field Trips */}
+        {!loading && fieldTrips.length > 0 && (
+          <div className="space-y-4 mt-10">
+            <h2 className="text-sm font-semibold text-[#8a8580] uppercase tracking-wide mb-6">
+              {fieldTrips.length} field trip search{fieldTrips.length !== 1 ? "es" : ""}
+            </h2>
+
+            {fieldTrips.map((trip) => {
+              let count = 0;
+              try { count = (JSON.parse(trip.suggestions) as string[]).length; } catch { /* */ }
+              const searchUrl = `/field-trips?subject=${encodeURIComponent(trip.subject)}&zip=${encodeURIComponent(trip.zip)}`;
+              return (
+                <div
+                  key={trip.id}
+                  className="bg-white rounded-2xl border border-[#e8e4e0] shadow-sm p-5 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-xs text-[#8a8580] mb-1">{formatDate(trip.created_at)}</p>
+                      <h3 className="font-semibold text-[#2d2d2d] text-base">{trip.subject}</h3>
+                      <p className="text-sm text-[#8a8580] mt-1">
+                        Near {trip.zip}, within {trip.distance} miles
+                        {count > 0 && <span className="ml-2">/ {count} suggestion{count !== 1 ? "s" : ""} found</span>}
+                      </p>
+                    </div>
+                    <a
+                      href={searchUrl}
+                      className="bg-white text-[#5b8f8a] text-sm font-semibold px-3 py-2 rounded-lg border border-[#5b8f8a] hover:bg-[#e8f4f3] transition-colors whitespace-nowrap shrink-0"
+                    >
+                      Search Again
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

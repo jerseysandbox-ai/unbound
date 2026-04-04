@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
@@ -54,10 +54,11 @@ function SuggestionLine({ text }: { text: string }) {
 
 export default function FieldTripsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [authChecked, setAuthChecked] = useState(false);
-  const [subject, setSubject] = useState("");
-  const [zip, setZip] = useState("");
-  const [distance, setDistance] = useState("25");
+  const [subject, setSubject] = useState(searchParams.get("subject") ?? "");
+  const [zip, setZip] = useState(searchParams.get("zip") ?? "");
+  const [distance, setDistance] = useState(searchParams.get("distance") ?? "25");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -102,7 +103,16 @@ export default function FieldTripsPage() {
         throw new Error(data.error || "Something went wrong");
       }
 
-      setSuggestions(parseSuggestions(data.suggestions));
+      const parsedSuggestions = parseSuggestions(data.suggestions);
+      setSuggestions(parsedSuggestions);
+
+      // Save in background -- don't block the UI or show errors to user
+      fetch("/api/save-field-trip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject, zip, distance, suggestions: parsedSuggestions }),
+      }).catch(() => {});
+
       // Reset Turnstile for next submission
       setTurnstileToken(null);
       setResetKey((k) => k + 1);
