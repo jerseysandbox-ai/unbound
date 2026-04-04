@@ -1,5 +1,7 @@
 "use client";
 
+import { Suspense } from "react";
+
 /**
  * Field Trip Finder — /field-trips
  * Parents enter a subject/unit, zip code, and max travel distance to get
@@ -52,7 +54,7 @@ function SuggestionLine({ text }: { text: string }) {
   return <p className="mb-1 text-sm text-gray-700 leading-relaxed">{text}</p>;
 }
 
-export default function FieldTripsPage() {
+function FieldTripsPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [authChecked, setAuthChecked] = useState(false);
@@ -330,5 +332,13 @@ export default function FieldTripsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function FieldTripsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p className="text-gray-500">Loading...</p></div>}>
+      <FieldTripsPageInner />
+    </Suspense>
   );
 }
