@@ -1,3 +1,12 @@
+## v0.5.1 — 2026-04-04
+
+- Field trip results now render as clean labeled cards (no markdown symbols)
+- Download as PDF button saves field trip results as a file
+- Field trips saved to account history automatically after each search
+- Field trip history section added to account page with Search Again links
+- Fixed Turnstile using wrong keys (Tap Caps keys replaced with Unbound Learner keys)
+- Turnstile token auto-resets on expiry so users must re-verify before submitting
+
 # Changelog
 
 All notable changes to Unbound are documented here.

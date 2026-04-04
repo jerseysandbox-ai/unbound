@@ -1,5 +1,18 @@
 [
   {
+    "version": "0.5.1",
+    "date": "2026-04-04",
+    "summary": "Field trip formatting, PDF download, history tracking, Turnstile fix",
+    "changes": [
+      "Field trip results now render as clean labeled cards with no markdown symbols",
+      "Download as PDF button saves field trip results as a file",
+      "Field trips saved to account history automatically after each search",
+      "Field trip history section added to account page with Search Again links",
+      "Fixed Turnstile widget using wrong keys (Tap Caps keys replaced with Unbound Learner keys)",
+      "Turnstile token now auto-resets on expiry so users re-verify before submitting"
+    ]
+  },
+  {
     "version": "0.5.0",
     "date": "2026-04-02",
     "summary": "Quiz Generator with interactive scoring and printable PDFs",
