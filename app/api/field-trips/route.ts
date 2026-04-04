@@ -29,7 +29,11 @@ async function verifyTurnstile(token: string): Promise<boolean> {
     method: "POST",
     body: formData,
   });
-  const data = (await res.json()) as { success: boolean };
+  const data = (await res.json()) as { success: boolean; "error-codes"?: string[] };
+  // Log error codes so we can diagnose failures in Vercel logs
+  if (!data.success) {
+    console.error("[field-trips] Turnstile failed:", data["error-codes"]);
+  }
   return data.success === true;
 }
 
