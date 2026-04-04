@@ -239,12 +239,37 @@ export default function AccountPage() {
                             {count > 0 && <span className="ml-2">/ {count} suggestion{count !== 1 ? "s" : ""} found</span>}
                           </p>
                         </div>
-                        <a
-                          href={searchUrl}
-                          className="bg-white text-[#5b8f8a] text-sm font-semibold px-3 py-2 rounded-lg border border-[#5b8f8a] hover:bg-[#e8f4f3] transition-colors whitespace-nowrap shrink-0"
-                        >
-                          Search Again
-                        </a>
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={async () => {
+                              try {
+                                const suggestions = JSON.parse(trip.suggestions) as string[];
+                                const res = await fetch('/api/field-trips-pdf', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ subject: trip.subject, zip: trip.zip, distance: trip.distance, suggestions }),
+                                });
+                                if (!res.ok) return;
+                                const html = await res.text();
+                                const win = window.open('', '_blank');
+                                if (win) {
+                                  win.document.write(html);
+                                  win.document.close();
+                                  setTimeout(() => { win.focus(); win.print(); }, 400);
+                                }
+                              } catch { /* best effort */ }
+                            }}
+                            className="bg-white text-[#5b8f8a] text-sm font-semibold px-3 py-2 rounded-lg border border-[#5b8f8a] hover:bg-[#e8f4f3] transition-colors whitespace-nowrap"
+                          >
+                            Download PDF
+                          </button>
+                          <a
+                            href={searchUrl}
+                            className="bg-white text-[#5b8f8a] text-sm font-semibold px-3 py-2 rounded-lg border border-[#5b8f8a] hover:bg-[#e8f4f3] transition-colors whitespace-nowrap"
+                          >
+                            Search Again
+                          </a>
+                        </div>
                       </div>
                     </div>
                   );

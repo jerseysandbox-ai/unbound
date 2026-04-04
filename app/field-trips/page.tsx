@@ -283,16 +283,14 @@ function FieldTripsPageInner() {
                   });
                   if (!res.ok) throw new Error("Failed to generate PDF");
                   const html = await res.text();
-                  // Force download directly — never open in a new tab
-                  const blob = new Blob([html], { type: 'text/html' });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `field-trips-${subject.replace(/\s+/g, '-').toLowerCase()}.html`;
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  setTimeout(() => URL.revokeObjectURL(url), 5000);
+                  // Open in a new window with auto-print so browser saves as PDF
+                  const win = window.open('', '_blank');
+                  if (win) {
+                    win.document.write(html);
+                    win.document.close();
+                    // Small delay so styles load before print dialog opens
+                    setTimeout(() => { win.focus(); win.print(); }, 400);
+                  }
                 } catch (err) {
                   setError(err instanceof Error ? err.message : "Could not generate PDF. Please try again.");
                 } finally {
