@@ -24,9 +24,11 @@ interface TurnstileOptions {
 interface Props {
   onVerify: (token: string) => void;
   onError?: () => void;
+  // Called when the token expires so parent can clear its token state
+  onExpire?: () => void;
 }
 
-export default function TurnstileWidget({ onVerify, onError }: Props) {
+export default function TurnstileWidget({ onVerify, onError, onExpire }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
 
@@ -48,8 +50,18 @@ export default function TurnstileWidget({ onVerify, onError }: Props) {
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
           sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!,
           callback: onVerify,
-          "error-callback": onError,
-          "expired-callback": onError,
+          // On error: notify parent so it can clear token state
+          "error-callback": () => {
+            if (onError) onError();
+          },
+          // On expiry: notify parent AND auto-reset the widget so user re-verifies
+          // Without this, the widget shows "Success" but the token is dead
+          "expired-callback": () => {
+            if (onExpire) onExpire();
+            if (widgetIdRef.current && window.turnstile) {
+              window.turnstile.reset(widgetIdRef.current);
+            }
+          },
           theme: "light",
         });
       }
@@ -57,7 +69,6 @@ export default function TurnstileWidget({ onVerify, onError }: Props) {
 
     return () => {
       clearInterval(interval);
-      // Clean up widget on unmount
       if (widgetIdRef.current && window.turnstile) {
         window.turnstile.remove(widgetIdRef.current);
         widgetIdRef.current = null;

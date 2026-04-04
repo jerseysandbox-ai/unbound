@@ -185,6 +185,8 @@ export default function FieldTripsPage() {
             <TurnstileWidget
               key={resetKey}
               onVerify={(token) => setTurnstileToken(token)}
+              onExpire={() => setTurnstileToken(null)}
+              onError={() => setTurnstileToken(null)}
             />
           </div>
 

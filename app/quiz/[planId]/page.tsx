@@ -305,6 +305,7 @@ export default function QuizPage() {
                 <TurnstileWidget
                   onVerify={(token: string) => setTurnstileToken(token)}
                   onError={() => setTurnstileToken(null)}
+                  onExpire={() => setTurnstileToken(null)}
                 />
               </div>
 
