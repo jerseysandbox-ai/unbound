@@ -282,15 +282,16 @@ function FieldTripsPageInner() {
                     body: JSON.stringify({ subject, zip, distance, suggestions }),
                   });
                   if (!res.ok) throw new Error("Failed to generate PDF");
-                  const html = await res.text();
-                  // Open in a new window. User selects "Save as PDF" in the print dialog.
-                  const win = window.open('', '_blank');
-                  if (win) {
-                    // Inject a print-on-load script into the HTML
-                    const printHtml = html.replace('</body>', '<script>window.onload=function(){window.print();}<\/script></body>');
-                    win.document.write(printHtml);
-                    win.document.close();
-                  }
+                  // Download as a real PDF file
+                  const blob = new Blob([await res.arrayBuffer()], { type: 'application/pdf' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `field-trips-${subject.replace(/\s+/g, '-').toLowerCase()}.pdf`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  setTimeout(() => URL.revokeObjectURL(url), 5000);
                 } catch (err) {
                   setError(err instanceof Error ? err.message : "Could not generate PDF. Please try again.");
                 } finally {
@@ -306,7 +307,7 @@ function FieldTripsPageInner() {
                   Preparing PDF...
                 </span>
               ) : (
-                "Save as PDF (opens print dialog)"
+                "Download PDF"
               )}
             </button>
 

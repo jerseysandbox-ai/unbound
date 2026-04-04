@@ -250,13 +250,15 @@ export default function AccountPage() {
                                   body: JSON.stringify({ subject: trip.subject, zip: trip.zip, distance: trip.distance, suggestions }),
                                 });
                                 if (!res.ok) return;
-                                const html = await res.text();
-                                const win = window.open('', '_blank');
-                                if (win) {
-                                  win.document.write(html);
-                                  win.document.close();
-                                  setTimeout(() => { win.focus(); win.print(); }, 400);
-                                }
+                                const blob = new Blob([await res.arrayBuffer()], { type: 'application/pdf' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `field-trips-${trip.subject.replace(/\s+/g, '-').toLowerCase()}.pdf`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                setTimeout(() => URL.revokeObjectURL(url), 5000);
                               } catch { /* best effort */ }
                             }}
                             className="bg-white text-[#5b8f8a] text-sm font-semibold px-3 py-2 rounded-lg border border-[#5b8f8a] hover:bg-[#e8f4f3] transition-colors whitespace-nowrap"

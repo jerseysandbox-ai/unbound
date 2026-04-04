@@ -1,105 +1,206 @@
 /**
  * POST /api/field-trips-pdf
- *
- * Accepts { subject, zip, distance, suggestions } and returns clean HTML
- * suitable for browser print/save-as-PDF.
- *
- * Auth: requires authenticated Supabase session.
+ * Generates a real PDF of field trip suggestions using @react-pdf/renderer.
+ * Returns application/pdf with Content-Disposition: attachment.
+ * Auth required.
  */
 
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import React from "react";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  pdf,
+} from "@react-pdf/renderer";
 
-interface RequestBody {
+// Teal brand color
+const TEAL = "#1a5c5a";
+const LIGHT_TEAL = "#4a9d8f";
+const GRAY = "#6b6b6b";
+const DARK = "#2d2d2d";
+
+const styles = StyleSheet.create({
+  page: {
+    fontFamily: "Helvetica",
+    padding: 48,
+    backgroundColor: "#ffffff",
+    color: DARK,
+  },
+  header: {
+    marginBottom: 24,
+    borderBottomWidth: 2,
+    borderBottomColor: LIGHT_TEAL,
+    paddingBottom: 12,
+  },
+  title: {
+    fontSize: 22,
+    fontFamily: "Helvetica-Bold",
+    color: TEAL,
+    marginBottom: 4,
+  },
+  meta: {
+    fontSize: 10,
+    color: GRAY,
+  },
+  tripCard: {
+    marginBottom: 20,
+    paddingLeft: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: LIGHT_TEAL,
+  },
+  tripTitle: {
+    fontSize: 13,
+    fontFamily: "Helvetica-Bold",
+    color: TEAL,
+    marginBottom: 6,
+  },
+  line: {
+    fontSize: 10,
+    color: DARK,
+    marginBottom: 3,
+    lineHeight: 1.5,
+  },
+  label: {
+    fontSize: 10,
+    fontFamily: "Helvetica-Bold",
+    color: DARK,
+  },
+  footer: {
+    position: "absolute",
+    bottom: 32,
+    left: 48,
+    right: 48,
+    fontSize: 8,
+    color: GRAY,
+    textAlign: "center",
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+    paddingTop: 6,
+  },
+});
+
+/** Split a suggestion string into title + body lines, stripping markdown symbols */
+function parseSuggestion(raw: string): { title: string; lines: string[] } {
+  const lines = raw
+    .split("\n")
+    .map((l) => l.replace(/^[*#\-\s]+/, "").trim())
+    .filter(Boolean);
+  const title = lines[0]?.replace(/^\d+\.\s*/, "").replace(/\*\*/g, "") ?? "";
+  const body = lines.slice(1).map((l) => l.replace(/\*\*/g, ""));
+  return { title, lines: body };
+}
+
+/** Split a body line into optional label + rest */
+function parseBodyLine(line: string): { label?: string; rest: string } {
+  const match = line.match(/^([^:]{2,30}):\s*(.+)$/);
+  if (match) return { label: match[1], rest: match[2] };
+  return { rest: line };
+}
+
+function FieldTripPdf({
+  subject,
+  zip,
+  distance,
+  suggestions,
+}: {
   subject: string;
   zip: string;
   distance: string;
   suggestions: string[];
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function parseSuggestion(text: string): { title: string; lines: string[] } {
-  const lines = text.split("\n").map(l => l.replace(/^[*#]+\s*/, "").trim()).filter(Boolean);
-  const firstLine = lines[0] || "";
-  const title = firstLine.replace(/^\d+\.\s*/, "").replace(/\*\*/g, "");
-  const body = lines.slice(1).map(l => l.replace(/\*\*/g, "").replace(/^-\s*/, ""));
-  return { title, lines: body };
-}
-
-function renderLine(text: string): string {
-  const escaped = escapeHtml(text);
-  const match = escaped.match(/^([A-Za-z][A-Za-z\s]+:)\s*(.*)/);
-  if (match) {
-    return `<p class="trip-line"><span class="label">${match[1]}</span> ${match[2]}</p>`;
-  }
-  return `<p class="trip-line">${escaped}</p>`;
+}) {
+  return React.createElement(
+    Document,
+    null,
+    React.createElement(
+      Page,
+      { size: "LETTER", style: styles.page },
+      // Header
+      React.createElement(
+        View,
+        { style: styles.header },
+        React.createElement(Text, { style: styles.title }, `Field Trip Ideas: ${subject}`),
+        React.createElement(
+          Text,
+          { style: styles.meta },
+          `Near ${zip} within ${distance} miles`
+        )
+      ),
+      // Trip cards
+      ...suggestions.map((raw, i) => {
+        const { title, lines } = parseSuggestion(raw);
+        return React.createElement(
+          View,
+          { key: i, style: styles.tripCard },
+          React.createElement(Text, { style: styles.tripTitle }, title || `Suggestion ${i + 1}`),
+          ...lines.map((line, j) => {
+            const { label, rest } = parseBodyLine(line);
+            if (label) {
+              return React.createElement(
+                View,
+                { key: j, style: { flexDirection: "row", marginBottom: 3 } },
+                React.createElement(Text, { style: styles.label }, `${label}: `),
+                React.createElement(Text, { style: styles.line }, rest)
+              );
+            }
+            return React.createElement(Text, { key: j, style: styles.line }, line);
+          })
+        );
+      }),
+      // Footer
+      React.createElement(
+        Text,
+        { style: styles.footer, fixed: true },
+        "Generated by Unbound — unboundlearner.com"
+      )
+    )
+  );
 }
 
 export async function POST(request: Request) {
   try {
+    // Auth required
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const body: RequestBody = await request.json();
+    const body = await request.json() as {
+      subject?: string;
+      zip?: string;
+      distance?: string;
+      suggestions?: string[];
+    };
+
     const { subject, zip, distance, suggestions } = body;
 
-    if (!subject?.trim() || !zip?.trim() || !distance || !suggestions?.length) {
+    if (!subject || !zip || !Array.isArray(suggestions) || suggestions.length === 0) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const tripCards = suggestions
-      .map((raw) => {
-        const { title, lines } = parseSuggestion(raw);
-        const bodyHtml = lines.map(renderLine).join("\n    ");
-        return `  <div class="trip">
-    <p class="trip-title">${escapeHtml(title)}</p>
-    ${bodyHtml}
-  </div>`;
-      })
-      .join("\n");
+    // Generate real PDF bytes via @react-pdf/renderer
+    const doc = React.createElement(FieldTripPdf, {
+      subject,
+      zip: zip ?? "",
+      distance: distance ?? "25",
+      suggestions,
+    });
 
-    const html = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Field Trip Ideas: ${escapeHtml(subject)}</title>
-  <style>
-    body { font-family: Georgia, serif; max-width: 700px; margin: 40px auto; color: #2d2d2d; line-height: 1.6; }
-    h1 { color: #1a5c5a; font-size: 1.5rem; margin-bottom: 4px; }
-    .meta { color: #888; font-size: 0.85rem; margin-bottom: 32px; }
-    .trip { margin-bottom: 32px; border-left: 3px solid #4a9d8f; padding-left: 16px; }
-    .trip-title { font-size: 1.1rem; font-weight: bold; color: #1a5c5a; margin-bottom: 8px; }
-    .trip-line { margin-bottom: 4px; font-size: 0.95rem; }
-    .label { font-weight: bold; }
-    @media print { body { margin: 20px; } }
-  </style>
-</head>
-<body>
-  <h1>Field Trip Ideas: ${escapeHtml(subject)}</h1>
-  <p class="meta">Near ${escapeHtml(zip)} within ${escapeHtml(distance)} miles</p>
-${tripCards}
-</body>
-</html>`;
+    const pdfBytes = await pdf(doc as React.ReactElement).toBuffer();
+    const filename = `field-trips-${subject.replace(/\s+/g, "-").toLowerCase()}.pdf`;
 
-    return new Response(html, {
-      status: 200,
-      headers: { "Content-Type": "text/html; charset=utf-8" },
+    return new Response(pdfBytes, {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${filename}"`,
+      },
     });
   } catch (err) {
-    console.error("[field-trips-pdf]", err);
+    console.error("[field-trips-pdf] Error:", err);
     return NextResponse.json({ error: "PDF generation failed" }, { status: 500 });
   }
 }
